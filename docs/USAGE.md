@@ -6,7 +6,7 @@
 
 ```bash
 uv tool install exa-cli   # recommended
-pip install exa-cli       # or pip
+pip install exa-search-cli       # or pip
 ```
 
 ```bash

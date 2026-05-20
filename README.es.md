@@ -23,7 +23,7 @@
 uv tool install exa-cli
 ```
 
-> ¿Sin `uv`? Ejecuta `curl -LsSf https://astral.sh/uv/install.sh | sh`, o usa `pip install exa-cli`.
+> ¿Sin `uv`? Ejecuta `curl -LsSf https://astral.sh/uv/install.sh | sh`, o usa `pip install exa-search-cli`.
 
 **Paso 2 — Obtén tu clave de API:**  
 Ve a [exa.ai](https://exa.ai) → regístrate (plan gratuito disponible) → Dashboard → API Keys.

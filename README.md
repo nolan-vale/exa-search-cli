@@ -58,7 +58,7 @@ Every command outputs clean `--json` for use in scripts, pipelines, and AI agent
 uv tool install exa-cli
 ```
 
-> No `uv`? Run `curl -LsSf https://astral.sh/uv/install.sh | sh`, or use `pip install exa-cli`.
+> No `uv`? Run `curl -LsSf https://astral.sh/uv/install.sh | sh`, or use `pip install exa-search-cli`.
 
 ## Quick start
 
