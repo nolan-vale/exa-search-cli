@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "exa-cli"
+version = "0.1.0"
+description = "Command-line interface for Exa — the web search API for AI applications"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+keywords = ["exa", "search", "cli", "web-search", "ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Utilities",
+]
+dependencies = ["exa-py>=1.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/davidparker7966-design/exa-cli"
+Repository = "https://github.com/davidparker7966-design/exa-cli"
+Issues = "https://github.com/davidparker7966-design/exa-cli/issues"
+
+[project.scripts]
+exa-search   = "exa_cli.main:search"
+exa-crawl    = "exa_cli.main:crawl"
+exa-research = "exa_cli.main:research"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/exa_cli"]
