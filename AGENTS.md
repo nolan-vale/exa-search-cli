@@ -1,15 +1,16 @@
-# AGENTS.md — exa-cli for AI Coding Agents
+# AGENTS.md — exa-search-cli for AI Coding Agents
 
-This file is for AI agents (Claude Code, Codex, Cursor, Windsurf, etc.) that need to install and use `exa-cli` on behalf of a user.
+This file is for AI agents (Claude Code, Codex, Cursor, Windsurf, etc.) that need to install and use `exa-search-cli` on behalf of a user.
 
 ## Install & setup
 
 ```bash
-uv tool install exa-cli
+uv tool install exa-search-cli
 export EXA_API_KEY=your-key   # get at exa.ai — free tier available
 ```
 
 Persist the key:
+
 ```bash
 echo 'export EXA_API_KEY=your-key' >> ~/.zshrc
 ```
@@ -55,6 +56,7 @@ exa-research "topic" --json
 ## JSON output schemas
 
 **exa-search --json**
+
 ```json
 {
   "results": [
@@ -71,6 +73,7 @@ exa-research "topic" --json
 ```
 
 **exa-crawl --json**
+
 ```json
 {
   "results": [
@@ -86,6 +89,7 @@ exa-research "topic" --json
 ## All flags
 
 **exa-search**
+
 ```
 exa-search <query> [--similar <url>] [-n N] [-t auto|keyword|neural]
            [--text] [--json] [--category CATEGORY]
@@ -96,14 +100,25 @@ exa-search <query> [--similar <url>] [-n N] [-t auto|keyword|neural]
 Categories: `news`, `tweet`, `github`, `paper`, `company`, `research paper`, `financial report`, `personal site`, `pdf`, `linkedin profile`
 
 **exa-crawl**
+
 ```
 exa-crawl <url> [-c MAX_CHARS] [--json]
 ```
 
 **exa-research**
+
 ```
 exa-research <topic> [-m exa-research|exa-research-pro] [--json]
 ```
+
+## Rules for agents
+
+- Keep CLI output stable and script-friendly.
+- Do not break JSON output schemas without updating documentation.
+- Prefer explicit errors over silent failures.
+- Update `README.md`, `docs/USAGE.md`, and `llms.txt` when commands or install instructions change.
+- Keep examples copy-pasteable.
+- Do not rename terminal commands unless there is a strong reason.
 
 ## Properties
 
@@ -117,3 +132,10 @@ exa-research <topic> [-m exa-research|exa-research-pro] [--json]
 | Variable | Required | Description |
 |---|---|---|
 | `EXA_API_KEY` | yes | API key from exa.ai |
+
+## Documentation files
+
+- `README.md`: human-facing overview and quickstart
+- `llms.txt`: compact LLM-facing summary
+- `docs/USAGE.md`: detailed command reference
+- `CHANGELOG.md`: release notes

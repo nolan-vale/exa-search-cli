@@ -29,7 +29,7 @@ CLI for [Exa](https://exa.ai) — neural web search, URL crawling, and AI deep r
 
 ## What it does
 
-`exa-cli` wraps the [Exa API](https://exa.ai) in three terminal commands. Exa is a search API built for AI applications — it searches by meaning, not keywords, which means it finds relevant pages even when the exact words are not present in the content.
+`exa-search-cli` wraps the [Exa API](https://exa.ai) in three terminal commands. Exa is a search API built for AI applications — it searches by meaning, not keywords, which means it finds relevant pages even when the exact words are not present in the content.
 
 `exa-search` searches the web. `exa-crawl` extracts clean readable text from any URL without HTML. `exa-research` submits a deep research task where Exa AI reads the web and synthesizes a structured answer.
 
@@ -55,7 +55,7 @@ Every command outputs clean `--json` for use in scripts, pipelines, and AI agent
 ## Installation
 
 ```bash
-uv tool install exa-cli
+uv tool install exa-search-cli
 ```
 
 > No `uv`? Run `curl -LsSf https://astral.sh/uv/install.sh | sh`, or use `pip install exa-search-cli`.
@@ -118,7 +118,7 @@ exa-search "topic" --json | jq -r '.results[].url'
 
 ## AI agent usage
 
-`exa-cli` is stateless, read-only, and exits cleanly — designed to be called by AI coding assistants.
+`exa-search-cli` is stateless, read-only, and exits cleanly — designed to be called by AI coding assistants.
 
 ```bash
 # Search and extract URLs (most common agent pattern)
