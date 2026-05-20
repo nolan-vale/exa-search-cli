@@ -1,6 +1,6 @@
 <div align="center">
 
-← [English](../README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [한국어](README.ko.md)
+← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [한국어](README.ko.md)
 
 # exa-cli
 
@@ -84,7 +84,7 @@ exa-research "量子エラー訂正の現状"
 | `--similar` | — | この URL に類似したページを検索 |
 | `--json` | off | 生の JSON 出力 |
 
-→ **[完全なドキュメント](USAGE.md)**（英語）
+→ **[完全なドキュメント](docs/USAGE.md)**（英語）
 
 ---
 

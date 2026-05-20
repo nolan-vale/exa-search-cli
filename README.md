@@ -1,6 +1,6 @@
 <div align="center">
 
-[中文](docs/README.zh-CN.md) · [Русский](docs/README.ru.md) · [Português](docs/README.pt-BR.md) · [Español](docs/README.es.md) · [日本語](docs/README.ja.md) · [한국어](docs/README.ko.md)
+[中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
 <!--
   COVER IMAGE — generate with this prompt, save as docs/cover.png, then uncomment the img tag below.

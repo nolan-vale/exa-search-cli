@@ -1,6 +1,6 @@
 <div align="center">
 
-← [English](../README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
+← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
 
 # exa-cli
 
@@ -84,7 +84,7 @@ exa-research "양자 오류 수정의 현황"
 | `--similar` | — | 이 URL과 유사한 페이지 검색 |
 | `--json` | off | 원시 JSON 출력 |
 
-→ **[전체 문서](USAGE.md)**（영어）
+→ **[전체 문서](docs/USAGE.md)**（영어）
 
 ---
 

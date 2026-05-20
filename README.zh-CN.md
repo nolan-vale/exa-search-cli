@@ -1,6 +1,6 @@
 <div align="center">
 
-← [English](../README.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
+← [English](README.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
 # exa-cli
 
@@ -84,7 +84,7 @@ exa-research "量子纠错的现状"
 | `--similar` | — | 查找与此 URL 相似的页面 |
 | `--json` | off | 原始 JSON 输出 |
 
-→ **[完整文档](USAGE.md)**（英文）
+→ **[完整文档](docs/USAGE.zh-CN.md)** · [English](docs/USAGE.md)
 
 ---
 

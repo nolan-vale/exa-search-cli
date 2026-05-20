@@ -1,6 +1,6 @@
 <div align="center">
 
-← [English](../README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
+← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
 # exa-cli
 
@@ -84,7 +84,7 @@ exa-research "estado atual da correção de erros quânticos"
 | `--similar` | — | Encontrar páginas similares a esta URL |
 | `--json` | off | Saída JSON bruta |
 
-→ **[Documentação completa](USAGE.md)**（EN）
+→ **[Documentação completa](docs/USAGE.md)**（EN）
 
 ---
 
