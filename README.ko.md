@@ -6,7 +6,7 @@
 
 **[Exa](https://exa.ai) CLI — 뉴럴 웹 검색, URL 크롤링, AI 리서치를 터미널에서.**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-cli/)
+[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
 

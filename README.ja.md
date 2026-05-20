@@ -6,7 +6,7 @@
 
 **[Exa](https://exa.ai) の CLI ツール — ニューラル Web 検索・URL クロール・AI リサーチをターミナルから。**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-cli/)
+[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
 
