@@ -14,7 +14,7 @@
   <img src="docs/cover.png" alt="exa-cli" width="100%">
 -->
 
-# exa-cli
+# exa-search-cli
 
 CLI for [Exa](https://exa.ai) — neural web search, URL crawling, and AI deep research from the terminal.
 

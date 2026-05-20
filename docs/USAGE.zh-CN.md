@@ -1,4 +1,4 @@
-# exa-cli — 完整文档（中文）
+# exa-search-cli — 完整文档（中文）
 
 ← [返回 README](../README.zh-CN.md) · [English version](USAGE.md)
 

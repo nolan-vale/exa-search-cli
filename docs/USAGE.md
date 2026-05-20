@@ -1,4 +1,4 @@
-# exa-cli — Full Documentation
+# exa-search-cli — Full Documentation
 
 ← [Back to README](../README.md)
 

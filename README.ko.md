@@ -2,7 +2,7 @@
 
 ← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
 
-# exa-cli
+# exa-search-cli
 
 **[Exa](https://exa.ai) CLI — 뉴럴 웹 검색, URL 크롤링, AI 리서치를 터미널에서.**
 

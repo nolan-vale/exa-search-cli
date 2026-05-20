@@ -1,4 +1,4 @@
-# exa-cli — Полная документация (русский)
+# exa-search-cli — Полная документация (русский)
 
 ← [Назад в README](../README.ru.md) · [English version](USAGE.md)
 

@@ -2,7 +2,7 @@
 
 ← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-# exa-cli
+# exa-search-cli
 
 **CLI para [Exa](https://exa.ai) — búsqueda web neural, crawling de URLs y tareas de investigación con IA, desde el terminal.**
 

@@ -2,7 +2,7 @@
 
 ← [English](README.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-# exa-cli
+# exa-search-cli
 
 **[Exa](https://exa.ai) 的命令行工具 — 神经网络 Web 搜索、URL 爬取、AI 研究任务。**
 
