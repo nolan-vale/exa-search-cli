@@ -1,0 +1,64 @@
+# exa-search-cli
+
+> CLI for Exa neural search, URL crawling, and deep research from terminal. Built for developers, scripts, and AI agents that need clean JSON output.
+
+## Install
+
+```bash
+uv tool install exa-search-cli
+```
+
+or:
+
+```bash
+pip install exa-search-cli
+```
+
+Get API key at: https://exa.ai (free tier available)
+
+## Commands
+
+- `exa-search <query>` — neural web search. Flags: --json, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar <url>, --text
+- `exa-crawl <url>` — fetch full readable text from URL. Flags: --json, --max-chars
+- `exa-research <topic>` — AI deep research task. Flags: --json, --model
+
+## Categories for exa-search --category
+
+news, tweet, github, paper, company, research paper, financial report, personal site, pdf, linkedin profile
+
+## Best for
+
+- AI agents
+- search automation
+- terminal workflows
+- JSON output
+- developer productivity
+
+## Quick examples
+
+```bash
+exa-search "transformer architecture" --category "research paper" --json
+exa-search --similar https://github.com/astral-sh/uv --json
+exa-crawl https://example.com -c 8000
+exa-research "current state of quantum error correction" --json
+```
+
+## JSON output
+
+exa-search returns: results[]{title, url, published_date, author, highlights[], text}
+exa-crawl returns: results[]{url, title, text}
+
+## Key files
+
+- `README.md`: overview, install, quickstart
+- `AGENTS.md`: instructions for AI coding agents
+- `docs/USAGE.md`: full usage guide
+- `pyproject.toml`: package metadata and CLI entry points
+
+## Links
+
+- GitHub: https://github.com/nolan-vale/exa-search-cli
+- PyPI: https://pypi.org/project/exa-search-cli/
+- Exa API docs: https://docs.exa.ai
+- Full CLI docs: https://github.com/nolan-vale/exa-search-cli/blob/main/docs/USAGE.md
+- For agents: https://github.com/nolan-vale/exa-search-cli/blob/main/AGENTS.md
