@@ -14,7 +14,7 @@
 
 ---
 
-`exa-cli` は [Exa API](https://exa.ai) を 3 つのターミナルコマンドにラップします。Exa はキーワードではなく意味で検索します。すべてのコマンドはスクリプト・AI エージェント・パイプライン向けに `--json` をサポートします。
+`exa-cli` は [Exa API](https://exa.ai) を 4 つのターミナルコマンドにラップします。Exa はキーワードではなく意味で検索します。すべてのコマンドはスクリプト・AI エージェント・パイプライン向けに `--json` をサポートします。
 
 ## 60 秒で始める
 
@@ -45,7 +45,8 @@ exa-search "トランスフォーマーの仕組み" --category "research paper"
 |---|---|
 | `exa-search <クエリ>` | 意味による Web 検索。タイプ・日付・ドメインフィルタリング、類似ページ検索。 |
 | `exa-crawl <url>` | 任意の URL からクリーンなテキストを取得（HTML なし）。 |
-| `exa-research <トピック>` | 深層リサーチタスク。Exa AI が Web を読んで回答を合成。 |
+| `exa-research <トピック>` | 深層リサーチタスクを開始し、`research_id` を即座に返す。 |
+| `exa-research-status <research-id>` | `exa-research` で開始したタスクの状態・結果を取得。 |
 
 すべてのコマンドは `--json` に対応（`jq`、スクリプト、AI エージェントと連携可能）。
 
@@ -66,6 +67,7 @@ exa-crawl https://example.com -c 8000
 
 # AI による深層リサーチ
 exa-research "量子エラー訂正の現状"
+exa-research-status <research-id>   # 進捗確認・結果取得
 ```
 
 ## オプションリファレンス

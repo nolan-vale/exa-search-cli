@@ -14,7 +14,7 @@
 
 ---
 
-`exa-cli` envuelve la [Exa API](https://exa.ai) en tres comandos de terminal. Exa busca por significado, no por palabras clave. Todos los comandos soportan `--json` para scripts, agentes de IA y pipelines.
+`exa-cli` envuelve la [Exa API](https://exa.ai) en cuatro comandos de terminal. Exa busca por significado, no por palabras clave. Todos los comandos soportan `--json` para scripts, agentes de IA y pipelines.
 
 ## Empieza en 60 segundos
 
@@ -45,7 +45,8 @@ exa-search "cómo funcionan los transformers" --category "research paper"
 |---|---|
 | `exa-search <consulta>` | Búsqueda web por significado. Filtros por tipo, fecha, dominio. Encuentra páginas similares. |
 | `exa-crawl <url>` | Extrae texto limpio de cualquier URL, sin HTML. |
-| `exa-research <tema>` | Tarea de investigación profunda. La IA lee la web y sintetiza una respuesta. |
+| `exa-research <tema>` | Lanza una tarea de investigación profunda y devuelve un `research_id` de inmediato. |
+| `exa-research-status <research-id>` | Estado / resultado de una tarea lanzada con `exa-research`. |
 
 Todos los comandos aceptan `--json` para `jq`, scripts y agentes.
 
@@ -66,6 +67,7 @@ exa-crawl https://example.com -c 8000
 
 # Investigación profunda con IA
 exa-research "estado actual de la corrección de errores cuánticos"
+exa-research-status <research-id>   # comprobar progreso / obtener el resultado
 ```
 
 ## Referencia de opciones

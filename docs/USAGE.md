@@ -79,7 +79,7 @@ exa-research <topic> [options]
 
 | Flag | Default | Description |
 |---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research` or `exa-research-pro` |
+| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
 | `--json` | off | Raw JSON output |
 
 **Examples:**
@@ -89,6 +89,29 @@ exa-research "explain transformer attention mechanisms"
 exa-research "quantum computing current state" --model exa-research-pro
 exa-research "topic" --json
 ```
+
+`exa-research` only submits the task — it prints a `research_id` and returns immediately. Use `exa-research-status` to check progress and fetch the result.
+
+---
+
+### exa-research-status
+
+```
+exa-research-status <research-id> [options]
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--json` | off | Raw JSON output |
+
+**Examples:**
+
+```bash
+exa-research-status r_01k...
+exa-research-status r_01k... --json
+```
+
+Status is one of `pending`, `running`, `completed`, `failed`, `canceled`. When `completed`, the synthesized answer is printed (or available at `.output.content` in `--json` mode). When `failed`, the error message is printed (`.error` in JSON).
 
 ---
 

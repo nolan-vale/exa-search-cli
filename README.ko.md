@@ -14,7 +14,7 @@
 
 ---
 
-`exa-cli`는 [Exa API](https://exa.ai)를 세 개의 터미널 명령어로 감쌉니다. Exa는 키워드가 아닌 의미로 검색합니다. 모든 명령어는 스크립트, AI 에이전트, 파이프라인을 위한 `--json` 출력을 지원합니다.
+`exa-cli`는 [Exa API](https://exa.ai)를 네 개의 터미널 명령어로 감쌉니다. Exa는 키워드가 아닌 의미로 검색합니다. 모든 명령어는 스크립트, AI 에이전트, 파이프라인을 위한 `--json` 출력을 지원합니다.
 
 ## 60초 시작 가이드
 
@@ -45,7 +45,8 @@ exa-search "트랜스포머 작동 원리" --category "research paper"
 |---|---|
 | `exa-search <쿼리>` | 의미 기반 웹 검색. 타입·날짜·도메인 필터링. 유사 페이지 검색. |
 | `exa-crawl <url>` | 어떤 URL에서도 깔끔한 텍스트 추출 (HTML 없음). |
-| `exa-research <주제>` | 심층 리서치 태스크. Exa AI가 웹을 읽고 답변을 합성. |
+| `exa-research <주제>` | 심층 리서치 태스크를 시작하고 `research_id`를 즉시 반환. |
+| `exa-research-status <research-id>` | `exa-research`로 시작한 태스크의 상태/결과 확인. |
 
 모든 명령어는 `--json` 지원 (`jq`, 스크립트, AI 에이전트와 연동 가능).
 
@@ -66,6 +67,7 @@ exa-crawl https://example.com -c 8000
 
 # AI 심층 리서치
 exa-research "양자 오류 수정의 현황"
+exa-research-status <research-id>   # 진행 상황 확인 / 결과 가져오기
 ```
 
 ## 옵션 레퍼런스

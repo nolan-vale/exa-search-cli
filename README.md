@@ -29,9 +29,9 @@ CLI for [Exa](https://exa.ai) — neural web search, URL crawling, and AI deep r
 
 ## What it does
 
-`exa-search-cli` wraps the [Exa API](https://exa.ai) in three terminal commands. Exa is a search API built for AI applications — it searches by meaning, not keywords, which means it finds relevant pages even when the exact words are not present in the content.
+`exa-search-cli` wraps the [Exa API](https://exa.ai) in four terminal commands. Exa is a search API built for AI applications — it searches by meaning, not keywords, which means it finds relevant pages even when the exact words are not present in the content.
 
-`exa-search` searches the web. `exa-crawl` extracts clean readable text from any URL without HTML. `exa-research` submits a deep research task where Exa AI reads the web and synthesizes a structured answer.
+`exa-search` searches the web. `exa-crawl` extracts clean readable text from any URL without HTML. `exa-research` submits a deep research task where Exa AI reads the web and synthesizes a structured answer; `exa-research-status` checks on that task and returns the result once it's ready.
 
 Every command outputs clean `--json` for use in scripts, pipelines, and AI agent workflows.
 
@@ -92,6 +92,7 @@ exa-crawl https://example.com -c 8000
 
 # Deep research task
 exa-research "current state of quantum error correction"
+exa-research-status <research-id>   # check progress / fetch the result
 
 # JSON output for pipelines
 exa-search "topic" --json | jq -r '.results[].url'
@@ -114,7 +115,9 @@ exa-search "topic" --json | jq -r '.results[].url'
 
 **All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`
 
-**All flags — `exa-research`:** `-m` / `--model` (`exa-research` or `exa-research-pro`), `--json`
+**All flags — `exa-research`:** `-m` / `--model` (`exa-research-fast` · `exa-research` · `exa-research-pro`), `--json`
+
+**All flags — `exa-research-status`:** `--json`
 
 ## AI agent usage
 
@@ -134,6 +137,7 @@ exa-search --similar https://example.com --json
 
 # Deep research, get synthesized answer
 exa-research "topic" --json
+exa-research-status <research-id> --json
 ```
 
 JSON schema for `exa-search --json`:

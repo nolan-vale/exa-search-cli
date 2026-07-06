@@ -75,13 +75,34 @@ exa-research <主题> [选项]
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research` 或 `exa-research-pro` |
+| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
 | `--json` | 关闭 | 原始 JSON 输出 |
 
 ```bash
 exa-research "量子纠错的现状"
 exa-research "视觉语言模型 2025" --model exa-research-pro
 ```
+
+`exa-research` 只提交任务——打印 `research_id` 后立即返回。使用 `exa-research-status` 查询进度并获取结果。
+
+---
+
+### exa-research-status — 查询任务状态 / 结果
+
+```
+exa-research-status <research-id> [选项]
+```
+
+| 参数 | 默认值 | 说明 |
+|---|---|---|
+| `--json` | 关闭 | 原始 JSON 输出 |
+
+```bash
+exa-research-status r_01k...
+exa-research-status r_01k... --json
+```
+
+状态为 `pending`、`running`、`completed`、`failed`、`canceled` 之一。`completed` 时打印合成的答案（`--json` 模式下为 `.output.content`）；`failed` 时打印错误信息（`.error`）。
 
 ---
 

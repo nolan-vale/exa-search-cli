@@ -22,6 +22,7 @@ echo 'export EXA_API_KEY=your-key' >> ~/.zshrc
 | `exa-search <query>` | Neural web search. Understands meaning, not just keywords. |
 | `exa-crawl <url>` | Fetch full readable text from a URL. No HTML. |
 | `exa-research <topic>` | Submit a deep research task. Exa AI reads the web and synthesizes an answer. |
+| `exa-research-status <research-id>` | Check status / fetch the result of a research task started with `exa-research`. |
 
 All commands support `--json` for structured output.
 
@@ -51,6 +52,9 @@ exa-search "query" --start-date 2025-01-01 --json
 
 # Deep research task
 exa-research "topic" --json
+
+# Check research task status / fetch result
+exa-research-status <research-id> --json
 ```
 
 ## JSON output schemas
@@ -86,6 +90,20 @@ exa-research "topic" --json
 }
 ```
 
+**exa-research-status --json**
+
+```json
+{
+  "research_id": "r_...",
+  "created_at": 1783337223266.0,
+  "model": "exa-research",
+  "instructions": "the original topic",
+  "status": "pending | running | completed | failed | canceled",
+  "output": {"content": "synthesized answer, present when status is completed"},
+  "error": "present when status is failed"
+}
+```
+
 ## All flags
 
 **exa-search**
@@ -108,7 +126,13 @@ exa-crawl <url> [-c MAX_CHARS] [--json]
 **exa-research**
 
 ```
-exa-research <topic> [-m exa-research|exa-research-pro] [--json]
+exa-research <topic> [-m exa-research-fast|exa-research|exa-research-pro] [--json]
+```
+
+**exa-research-status**
+
+```
+exa-research-status <research-id> [--json]
 ```
 
 ## Rules for agents

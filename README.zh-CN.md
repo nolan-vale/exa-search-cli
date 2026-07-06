@@ -14,7 +14,7 @@
 
 ---
 
-`exa-cli` 将 [Exa API](https://exa.ai) 封装为三个终端命令。Exa 按语义搜索，而非关键词匹配。所有命令支持 `--json` 输出，适合脚本、AI 代理和流水线使用。
+`exa-cli` 将 [Exa API](https://exa.ai) 封装为四个终端命令。Exa 按语义搜索，而非关键词匹配。所有命令支持 `--json` 输出，适合脚本、AI 代理和流水线使用。
 
 ## 60 秒上手
 
@@ -45,7 +45,8 @@ exa-search "transformer 注意力机制" --category "research paper"
 |---|---|
 | `exa-search <查询>` | 语义 Web 搜索。支持类型过滤、日期范围、域名过滤、查找相似页面。 |
 | `exa-crawl <url>` | 获取任意 URL 的干净可读文本。 |
-| `exa-research <主题>` | 提交深度研究任务。Exa AI 读取网页并综合生成答案。 |
+| `exa-research <主题>` | 提交深度研究任务，立即返回 `research_id`。 |
+| `exa-research-status <research-id>` | 查询 `exa-research` 提交的任务的状态/结果。 |
 
 所有命令支持 `--json`（结构化输出，可与 `jq` 或 AI 代理配合使用）。
 
@@ -66,6 +67,7 @@ exa-crawl https://example.com -c 8000
 
 # AI 深度研究
 exa-research "量子纠错的现状"
+exa-research-status <research-id>   # 查看进度 / 获取结果
 ```
 
 ## 参数参考

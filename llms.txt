@@ -21,6 +21,7 @@ Get API key at: https://exa.ai (free tier available)
 - `exa-search <query>` — neural web search. Flags: --json, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar <url>, --text
 - `exa-crawl <url>` — fetch full readable text from URL. Flags: --json, --max-chars
 - `exa-research <topic>` — AI deep research task. Flags: --json, --model
+- `exa-research-status <research-id>` — check status / fetch result of a research task. Flags: --json
 
 ## Categories for exa-search --category
 
@@ -41,12 +42,14 @@ exa-search "transformer architecture" --category "research paper" --json
 exa-search --similar https://github.com/astral-sh/uv --json
 exa-crawl https://example.com -c 8000
 exa-research "current state of quantum error correction" --json
+exa-research-status r_01k... --json
 ```
 
 ## JSON output
 
 exa-search returns: results[]{title, url, published_date, author, highlights[], text}
 exa-crawl returns: results[]{url, title, text}
+exa-research / exa-research-status return: {research_id, model, instructions, status, output.content, error}
 
 ## Key files
 

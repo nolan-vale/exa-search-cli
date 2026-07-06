@@ -75,13 +75,34 @@ exa-research <тема> [параметры]
 
 | Флаг | По умолчанию | Описание |
 |---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research` или `exa-research-pro` |
+| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
 | `--json` | off | Сырой JSON-вывод |
 
 ```bash
 exa-research "текущее состояние квантовой коррекции ошибок"
 exa-research "vision language models 2025" --model exa-research-pro
 ```
+
+`exa-research` только запускает задачу — печатает `research_id` и сразу завершается. Статус и результат проверяются через `exa-research-status`.
+
+---
+
+### exa-research-status — статус / результат задачи
+
+```
+exa-research-status <research-id> [параметры]
+```
+
+| Флаг | По умолчанию | Описание |
+|---|---|---|
+| `--json` | off | Сырой JSON-вывод |
+
+```bash
+exa-research-status r_01k...
+exa-research-status r_01k... --json
+```
+
+Статус — один из `pending`, `running`, `completed`, `failed`, `canceled`. При `completed` печатается синтезированный ответ (`.output.content` в `--json`). При `failed` — сообщение об ошибке (`.error`).
 
 ---
 
