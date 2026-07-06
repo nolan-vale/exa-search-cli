@@ -203,20 +203,48 @@ def research() -> None:
     )
     p.add_argument("topic")
     p.add_argument("-m", "--model", default="exa-research",
-                   choices=["exa-research", "exa-research-pro"])
+                   choices=["exa-research-fast", "exa-research", "exa-research-pro"])
     p.add_argument("--json", action="store_true", help="raw JSON output")
     args = p.parse_args()
 
     exa = _client()
-    result = exa.research.create_task(instructions=args.topic, model=args.model)
+    result = exa.research.create(instructions=args.topic, model=args.model)
 
     if args.json:
         _dump_json(result)
     else:
-        task_id = getattr(result, "id", None) or getattr(result, "task_id", str(result))
-        status = getattr(result, "status", "submitted")
         print("Research task created")
-        print(f"  ID:     {task_id}")
-        print(f"  Model:  {args.model}")
-        print(f"  Status: {status}")
-        print(f"\nCheck status: exa-research-status {task_id}")
+        print(f"  ID:     {result.research_id}")
+        print(f"  Model:  {result.model}")
+        print(f"  Status: {result.status}")
+        print(f"\nCheck status: exa-research-status {result.research_id}")
+
+
+def research_status() -> None:
+    p = argparse.ArgumentParser(
+        description="Exa deep research — check status and fetch the result of a research task",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""examples:
+  exa-research-status <research-id>
+  exa-research-status <research-id> --json
+""",
+    )
+    p.add_argument("research_id")
+    p.add_argument("--json", action="store_true", help="raw JSON output")
+    args = p.parse_args()
+
+    exa = _client()
+    result = exa.research.get(args.research_id)
+
+    if args.json:
+        _dump_json(result)
+        return
+
+    print(f"Status: {result.status}")
+    if result.status == "completed":
+        print("\nResult:")
+        print(result.output.content)
+    elif result.status == "failed":
+        print(f"\nError: {result.error}")
+    else:
+        print("Still in progress — check again shortly.")

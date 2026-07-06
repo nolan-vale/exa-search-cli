@@ -54,9 +54,10 @@ Issues = "https://github.com/nolan-vale/exa-search-cli/issues"
 Changelog = "https://github.com/nolan-vale/exa-search-cli/releases"
 
 [project.scripts]
-exa-search   = "exa_cli.main:search"
-exa-crawl    = "exa_cli.main:crawl"
-exa-research = "exa_cli.main:research"
+exa-search          = "exa_cli.main:search"
+exa-crawl           = "exa_cli.main:crawl"
+exa-research        = "exa_cli.main:research"
+exa-research-status = "exa_cli.main:research_status"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/exa_cli"]
