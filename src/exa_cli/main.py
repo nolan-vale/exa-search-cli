@@ -24,11 +24,18 @@ def _client() -> Exa:
     return Exa(api_key=key)
 
 
+def _to_serializable(obj):
+    # Recursively unwrap SDK objects (SearchResponse, Result, cost_dollars, …)
+    # into plain dicts so nested results serialize as JSON objects, not str().
+    if hasattr(obj, "__dict__"):
+        return vars(obj)
+    if hasattr(obj, "_asdict"):
+        return obj._asdict()
+    return str(obj)
+
+
 def _dump_json(data) -> None:
-    if hasattr(data, "__dict__"):
-        print(json.dumps(data.__dict__, default=str, ensure_ascii=False, indent=2))
-    else:
-        print(json.dumps(data, default=str, ensure_ascii=False, indent=2))
+    print(json.dumps(data, default=_to_serializable, ensure_ascii=False, indent=2))
 
 
 def _meta(r) -> str:
