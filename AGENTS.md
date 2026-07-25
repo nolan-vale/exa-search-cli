@@ -24,6 +24,14 @@ echo 'export EXA_API_KEY=your-key' >> ~/.zshrc
 | `exa-research <topic>` | Submit a deep research task. Exa AI reads the web and synthesizes an answer. |
 | `exa-research-status <research-id>` | Check status / fetch the result of a research task started with `exa-research`. |
 
+## Agent Memory v5
+
+- Current task state: `.agent/current.md`.
+- Stable repo context: `memory/project.md`.
+- Durable decisions: `memory/decisions/*.md`.
+- Substantial plans or research syntheses: `memory/specs/*.md`.
+- Do not create repo-local task mirrors.
+
 All commands support `--json` for structured output.
 
 ## Recommended agent patterns
