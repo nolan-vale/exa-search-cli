@@ -50,6 +50,7 @@ exa-research-status r_01k... --json
 exa-search returns: results[]{title, url, published_date, author, highlights[], text}
 exa-crawl returns: results[]{url, title, text}
 exa-research / exa-research-status return: {research_id, model, instructions, status, output.content, error}
+Agent-safe jq result iterator: (if type=="array" then . else (.results // []) end)[]
 
 ## Key files
 

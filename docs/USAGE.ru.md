@@ -32,7 +32,7 @@ exa-search <запрос> [--similar <url>] [параметры]
 | `--include-domain` | — | Только эти домены (через запятую) |
 | `--exclude-domain` | — | Исключить эти домены (через запятую) |
 | `--similar` | — | Найти похожие страницы по URL |
-| `--json` | off | Сырой JSON-вывод |
+| `--json` | off | Структурированный JSON-вывод |
 
 **Типы контента (--category):**
 `news` · `tweet` · `github` · `paper` · `company` · `research paper` · `financial report` · `personal site` · `pdf` · `linkedin profile`
@@ -41,7 +41,7 @@ exa-search <запрос> [--similar <url>] [параметры]
 ```bash
 exa-search "последние архитектуры больших языковых моделей" -n 10
 exa-search "transformer attention" --category "research paper" --start-date 2025-01-01
-exa-search "async rust" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 exa-search --similar https://github.com/astral-sh/uv
 exa-search "python туториал" --exclude-domain medium.com
 ```
@@ -57,7 +57,7 @@ exa-crawl <url> [параметры]
 | Флаг | По умолчанию | Описание |
 |---|---|---|
 | `-c` / `--max-chars` | `5000` | Максимум символов для возврата |
-| `--json` | off | Сырой JSON-вывод |
+| `--json` | off | Структурированный JSON-вывод |
 
 ```bash
 exa-crawl https://example.com
@@ -76,7 +76,7 @@ exa-research <тема> [параметры]
 | Флаг | По умолчанию | Описание |
 |---|---|---|
 | `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | off | Сырой JSON-вывод |
+| `--json` | off | Структурированный JSON-вывод |
 
 ```bash
 exa-research "текущее состояние квантовой коррекции ошибок"
@@ -95,7 +95,7 @@ exa-research-status <research-id> [параметры]
 
 | Флаг | По умолчанию | Описание |
 |---|---|---|
-| `--json` | off | Сырой JSON-вывод |
+| `--json` | off | Структурированный JSON-вывод |
 
 ```bash
 exa-research-status r_01k...
@@ -110,14 +110,14 @@ exa-research-status r_01k... --json
 
 ```bash
 # Извлечь все URL
-exa-search "rust web frameworks" --json | jq -r '.results[].url'
+exa-search "rust web frameworks" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Поиск + краулинг первого результата
 exa-search "pytorch tutorial" --json \
-  | jq -r '.results[0].url' \
+  | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' \
   | xargs exa-crawl -c 8000
 
 # Фильтр результатов по домену
 exa-search "frameworks" --json \
-  | jq '[.results[] | select(.url | test("github\\.com"))]'
+  | jq '[(if type=="array" then . else (.results // []) end)[] | select(.url | test("github\\.com"))]'
 ```

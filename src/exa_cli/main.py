@@ -9,11 +9,19 @@ from exa_py import Exa
 from exa_py.api import ContentsOptions
 
 TEXT_PREVIEW_LEN = 2000
+RESULT_LIST_KEYS = ("results", "data", "items")
 
 CATEGORIES = [
-    "news", "tweet", "github", "paper", "company",
-    "research paper", "financial report", "personal site",
-    "pdf", "linkedin profile",
+    "news",
+    "tweet",
+    "github",
+    "paper",
+    "company",
+    "research paper",
+    "financial report",
+    "personal site",
+    "pdf",
+    "linkedin profile",
 ]
 
 
@@ -25,13 +33,41 @@ def _client() -> Exa:
 
 
 def _to_serializable(obj):
-    # Recursively unwrap SDK objects (SearchResponse, Result, cost_dollars, …)
+    # Recursively unwrap SDK objects (SearchResponse, Result, cost_dollars, ...)
     # into plain dicts so nested results serialize as JSON objects, not str().
-    if hasattr(obj, "__dict__"):
-        return vars(obj)
+    if obj is None or isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, list | tuple):
+        return [_to_serializable(item) for item in obj]
+    if isinstance(obj, dict):
+        return {str(key): _to_serializable(value) for key, value in obj.items()}
     if hasattr(obj, "_asdict"):
-        return obj._asdict()
+        return _to_serializable(obj._asdict())
+    if hasattr(obj, "__dict__"):
+        return _to_serializable(vars(obj))
     return str(obj)
+
+
+def _results_json_payload(response) -> dict:
+    data = _to_serializable(response)
+
+    if isinstance(data, list):
+        return {"results": data}
+
+    if isinstance(data, dict):
+        for key in RESULT_LIST_KEYS:
+            if isinstance(data.get(key), list):
+                payload = dict(data)
+                payload["results"] = data[key]
+                return payload
+
+        payload = dict(data)
+        if "results" in payload:
+            payload["raw_results"] = payload["results"]
+        payload["results"] = []
+        return payload
+
+    return {"results": [], "value": data}
 
 
 def _dump_json(data) -> None:
@@ -96,7 +132,7 @@ def _print_results(results, response, full_text: bool = False) -> None:
     cost = getattr(response, "cost_dollars", None)
     t = getattr(response, "search_time", None)
     cost_str = f"${cost.total:.4f}" if cost and hasattr(cost, "total") else ""
-    time_str = f"{t/1000:.1f}s" if t else ""
+    time_str = f"{t / 1000:.1f}s" if t else ""
     footer = "  ·  ".join(filter(None, [f"{len(results)} results", cost_str, time_str]))
     print(f"── {footer} ──")
 
@@ -121,18 +157,34 @@ def search() -> None:
     )
     p.add_argument("query", nargs="?", help="search query (omit when using --similar)")
     p.add_argument("-n", "--num-results", type=int, default=8)
-    p.add_argument("-t", "--type", choices=["auto", "keyword", "neural"], default="auto")
+    p.add_argument(
+        "-t", "--type", choices=["auto", "keyword", "neural"], default="auto"
+    )
     p.add_argument("--text", action="store_true", help="fetch and show full page text")
-    p.add_argument("--category", choices=CATEGORIES, metavar="CATEGORY",
-                   help=f"filter by content type: {', '.join(CATEGORIES)}")
-    p.add_argument("--start-date", metavar="YYYY-MM-DD", help="published on or after this date")
-    p.add_argument("--end-date", metavar="YYYY-MM-DD", help="published on or before this date")
-    p.add_argument("--include-domain", metavar="DOMAINS",
-                   help="only include these domains (comma-separated)")
-    p.add_argument("--exclude-domain", metavar="DOMAINS",
-                   help="exclude these domains (comma-separated)")
+    p.add_argument(
+        "--category",
+        choices=CATEGORIES,
+        metavar="CATEGORY",
+        help=f"filter by content type: {', '.join(CATEGORIES)}",
+    )
+    p.add_argument(
+        "--start-date", metavar="YYYY-MM-DD", help="published on or after this date"
+    )
+    p.add_argument(
+        "--end-date", metavar="YYYY-MM-DD", help="published on or before this date"
+    )
+    p.add_argument(
+        "--include-domain",
+        metavar="DOMAINS",
+        help="only include these domains (comma-separated)",
+    )
+    p.add_argument(
+        "--exclude-domain",
+        metavar="DOMAINS",
+        help="exclude these domains (comma-separated)",
+    )
     p.add_argument("--similar", metavar="URL", help="find pages similar to this URL")
-    p.add_argument("--json", action="store_true", help="raw JSON output")
+    p.add_argument("--json", action="store_true", help="structured JSON output")
     args = p.parse_args()
 
     if not args.query and not args.similar:
@@ -162,13 +214,14 @@ def search() -> None:
         kwargs["exclude_domains"] = _split_domains(args.exclude_domain)
 
     if args.similar:
-        result = exa.find_similar(args.similar, **{k: v for k, v in kwargs.items()
-                                                    if k not in ("type",)})
+        result = exa.find_similar(
+            args.similar, **{k: v for k, v in kwargs.items() if k not in ("type",)}
+        )
     else:
         result = exa.search(args.query, **kwargs)
 
     if args.json:
-        _dump_json(result)
+        _dump_json(_results_json_payload(result))
     else:
         _print_results(result.results, result, full_text=args.text)
 
@@ -184,16 +237,21 @@ def crawl() -> None:
 """,
     )
     p.add_argument("url")
-    p.add_argument("-c", "--max-chars", type=int, default=5000,
-                   help="max characters to return (default: 5000)")
-    p.add_argument("--json", action="store_true", help="raw JSON output")
+    p.add_argument(
+        "-c",
+        "--max-chars",
+        type=int,
+        default=5000,
+        help="max characters to return (default: 5000)",
+    )
+    p.add_argument("--json", action="store_true", help="structured JSON output")
     args = p.parse_args()
 
     exa = _client()
     result = exa.get_contents([args.url], text={"max_characters": args.max_chars})
 
     if args.json:
-        _dump_json(result)
+        _dump_json(_results_json_payload(result))
     else:
         _print_results(result.results, result, full_text=True)
 
@@ -209,9 +267,13 @@ def research() -> None:
 """,
     )
     p.add_argument("topic")
-    p.add_argument("-m", "--model", default="exa-research",
-                   choices=["exa-research-fast", "exa-research", "exa-research-pro"])
-    p.add_argument("--json", action="store_true", help="raw JSON output")
+    p.add_argument(
+        "-m",
+        "--model",
+        default="exa-research",
+        choices=["exa-research-fast", "exa-research", "exa-research-pro"],
+    )
+    p.add_argument("--json", action="store_true", help="structured JSON output")
     args = p.parse_args()
 
     exa = _client()
@@ -237,7 +299,7 @@ def research_status() -> None:
 """,
     )
     p.add_argument("research_id")
-    p.add_argument("--json", action="store_true", help="raw JSON output")
+    p.add_argument("--json", action="store_true", help="structured JSON output")
     args = p.parse_args()
 
     exa = _client()

@@ -95,7 +95,7 @@ exa-research "current state of quantum error correction"
 exa-research-status <research-id>   # check progress / fetch the result
 
 # JSON output for pipelines
-exa-search "topic" --json | jq -r '.results[].url'
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
 **All flags — `exa-search`:**
@@ -111,7 +111,7 @@ exa-search "topic" --json | jq -r '.results[].url'
 | `--include-domain` | — | Comma-separated domains to include only |
 | `--exclude-domain` | — | Comma-separated domains to exclude |
 | `--similar` | — | Find pages similar to this URL |
-| `--json` | off | Raw JSON output |
+| `--json` | off | Structured JSON output |
 
 **All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`
 
@@ -125,11 +125,11 @@ exa-search "topic" --json | jq -r '.results[].url'
 
 ```bash
 # Search and extract URLs (most common agent pattern)
-exa-search "topic" --json | jq -r '.results[].url'
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Search → crawl first result
 exa-search "topic" --json \
-  | jq -r '.results[0].url' \
+  | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' \
   | xargs exa-crawl -c 6000
 
 # Find similar pages to a reference URL

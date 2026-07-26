@@ -60,7 +60,7 @@ exa-search --similar https://github.com/astral-sh/uv
 exa-search "modelos de linguagem visual" --category "research paper" --start-date 2025-01-01
 
 # Apenas repositórios GitHub, lista de URLs
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Texto limpo de qualquer página
 exa-crawl https://example.com -c 8000
@@ -84,7 +84,7 @@ exa-research-status <research-id>   # verificar progresso / obter o resultado
 | `--include-domain` | — | Incluir apenas esses domínios (separados por vírgula) |
 | `--exclude-domain` | — | Excluir esses domínios (separados por vírgula) |
 | `--similar` | — | Encontrar páginas similares a esta URL |
-| `--json` | off | Saída JSON bruta |
+| `--json` | off | Saída JSON estruturada |
 
 → **[Documentação completa](docs/USAGE.md)**（EN）
 

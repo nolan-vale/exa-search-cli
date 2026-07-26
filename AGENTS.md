@@ -41,10 +41,10 @@ All commands support `--json` for structured output.
 exa-search "topic" --json
 
 # Extract just the URLs
-exa-search "topic" --json | jq -r '.results[].url'
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Search + crawl the top result
-exa-search "topic" --json | jq -r '.results[0].url' | xargs exa-crawl -c 6000
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' | xargs exa-crawl -c 6000
 
 # Find pages similar to a URL (great for research)
 exa-search --similar https://example.com --json

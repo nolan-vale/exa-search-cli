@@ -60,7 +60,7 @@ exa-search --similar https://github.com/astral-sh/uv
 exa-search "視覚言語モデル" --category "research paper" --start-date 2025-01-01
 
 # GitHub リポジトリのみ、URL リストを取得
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # 任意ページのクリーンなテキストを取得
 exa-crawl https://example.com -c 8000
@@ -84,7 +84,7 @@ exa-research-status <research-id>   # 進捗確認・結果取得
 | `--include-domain` | — | このドメインのみ含める（カンマ区切り） |
 | `--exclude-domain` | — | このドメインを除外（カンマ区切り） |
 | `--similar` | — | この URL に類似したページを検索 |
-| `--json` | off | 生の JSON 出力 |
+| `--json` | off | 構造化 JSON 出力 |
 
 → **[完全なドキュメント](docs/USAGE.md)**（英語）
 

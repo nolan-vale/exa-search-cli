@@ -60,7 +60,7 @@ exa-search --similar https://github.com/astral-sh/uv
 exa-search "视觉语言模型" --category "research paper" --start-date 2025-01-01
 
 # 只搜索 GitHub 仓库，输出 URL 列表
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # 抓取任意页面的干净文本
 exa-crawl https://example.com -c 8000
@@ -84,7 +84,7 @@ exa-research-status <research-id>   # 查看进度 / 获取结果
 | `--include-domain` | — | 只包含这些域名（逗号分隔） |
 | `--exclude-domain` | — | 排除这些域名（逗号分隔） |
 | `--similar` | — | 查找与此 URL 相似的页面 |
-| `--json` | off | 原始 JSON 输出 |
+| `--json` | off | 结构化 JSON 输出 |
 
 → **[完整文档](docs/USAGE.zh-CN.md)** · [English](docs/USAGE.md)
 

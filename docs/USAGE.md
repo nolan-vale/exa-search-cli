@@ -33,7 +33,7 @@ exa-search --similar <url> [options]
 | `--include-domain` | — | Comma-separated domains to include only |
 | `--exclude-domain` | — | Comma-separated domains to exclude |
 | `--similar` | — | Find pages similar to this URL |
-| `--json` | off | Raw JSON output |
+| `--json` | off | Structured JSON output |
 
 **Categories:** `news` · `tweet` · `github` · `paper` · `company` · `research paper` · `financial report` · `personal site` · `pdf` · `linkedin profile`
 
@@ -59,7 +59,7 @@ exa-crawl <url> [options]
 | Flag | Default | Description |
 |---|---|---|
 | `-c` / `--max-chars` | `5000` | Max characters to return |
-| `--json` | off | Raw JSON output |
+| `--json` | off | Structured JSON output |
 
 **Examples:**
 
@@ -80,7 +80,7 @@ exa-research <topic> [options]
 | Flag | Default | Description |
 |---|---|---|
 | `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | off | Raw JSON output |
+| `--json` | off | Structured JSON output |
 
 **Examples:**
 
@@ -102,7 +102,7 @@ exa-research-status <research-id> [options]
 
 | Flag | Default | Description |
 |---|---|---|
-| `--json` | off | Raw JSON output |
+| `--json` | off | Structured JSON output |
 
 **Examples:**
 
@@ -118,18 +118,21 @@ Status is one of `pending`, `running`, `completed`, `failed`, `canceled`. When `
 ## Piping and scripting
 
 ```bash
-# Extract all URLs from search results
-exa-search "rust async runtimes" --json | jq -r '.results[].url'
+# Extract all URLs from search results.
+# The jq normalizer handles both the documented {"results": [...]} object
+# and older/mixed top-level result arrays.
+exa-search "rust async runtimes" --json \
+  | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Find similar pages and collect their text
 exa-search --similar https://example.com --json \
-  | jq -r '.results[].url' \
+  | jq -r '(if type=="array" then . else (.results // []) end)[] | .url' \
   | head -3 \
   | xargs -I{} exa-crawl {}
 
 # Search + crawl first result
 exa-search "pytorch tutorial" --json \
-  | jq -r '.results[0].url' \
+  | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' \
   | xargs exa-crawl -c 8000
 
 # Bulk domain-filtered search to file
@@ -137,7 +140,7 @@ exa-search "API design" --include-domain github.com --json > results.json
 
 # Filter results by domain in jq
 exa-search "frameworks" --json \
-  | jq '[.results[] | select(.url | test("github\\.com"))]'
+  | jq '[(if type=="array" then . else (.results // []) end)[] | select(.url | test("github\\.com"))]'
 ```
 
 ## Environment

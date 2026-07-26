@@ -60,7 +60,7 @@ exa-search --similar https://github.com/astral-sh/uv
 exa-search "vision language models" --category "research paper" --start-date 2025-01-01
 
 # Только GitHub-репозитории, список URL
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # Получить текст страницы без HTML
 exa-crawl https://example.com -c 8000
@@ -84,7 +84,7 @@ exa-research-status <research-id>   # проверить статус / полу
 | `--include-domain` | — | Только эти домены (через запятую) |
 | `--exclude-domain` | — | Исключить эти домены (через запятую) |
 | `--similar` | — | Найти похожие страницы по URL |
-| `--json` | off | Сырой JSON-вывод |
+| `--json` | off | Структурированный JSON-вывод |
 
 → **[Полная документация](docs/USAGE.ru.md)** · [English](docs/USAGE.md)
 

@@ -32,7 +32,7 @@ exa-search <查询> [--similar <url>] [选项]
 | `--include-domain` | — | 只包含这些域名（逗号分隔） |
 | `--exclude-domain` | — | 排除这些域名（逗号分隔） |
 | `--similar` | — | 查找与此 URL 相似的页面 |
-| `--json` | 关闭 | 原始 JSON 输出 |
+| `--json` | 关闭 | 结构化 JSON 输出 |
 
 **内容类型 (--category)：**
 `news` · `tweet` · `github` · `paper` · `company` · `research paper` · `financial report` · `personal site` · `pdf` · `linkedin profile`
@@ -41,7 +41,7 @@ exa-search <查询> [--similar <url>] [选项]
 ```bash
 exa-search "最新的大语言模型架构" -n 10
 exa-search "transformer attention" --category "research paper" --start-date 2025-01-01
-exa-search "async rust" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 exa-search --similar https://github.com/astral-sh/uv
 exa-search "python 教程" --exclude-domain medium.com
 ```
@@ -57,7 +57,7 @@ exa-crawl <url> [选项]
 | 参数 | 默认值 | 说明 |
 |---|---|---|
 | `-c` / `--max-chars` | `5000` | 最大返回字符数 |
-| `--json` | 关闭 | 原始 JSON 输出 |
+| `--json` | 关闭 | 结构化 JSON 输出 |
 
 ```bash
 exa-crawl https://example.com
@@ -76,7 +76,7 @@ exa-research <主题> [选项]
 | 参数 | 默认值 | 说明 |
 |---|---|---|
 | `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | 关闭 | 原始 JSON 输出 |
+| `--json` | 关闭 | 结构化 JSON 输出 |
 
 ```bash
 exa-research "量子纠错的现状"
@@ -95,7 +95,7 @@ exa-research-status <research-id> [选项]
 
 | 参数 | 默认值 | 说明 |
 |---|---|---|
-| `--json` | 关闭 | 原始 JSON 输出 |
+| `--json` | 关闭 | 结构化 JSON 输出 |
 
 ```bash
 exa-research-status r_01k...
@@ -110,14 +110,14 @@ exa-research-status r_01k... --json
 
 ```bash
 # 提取所有 URL
-exa-search "rust web frameworks" --json | jq -r '.results[].url'
+exa-search "rust web frameworks" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # 搜索 + 爬取第一个结果
 exa-search "pytorch tutorial" --json \
-  | jq -r '.results[0].url' \
+  | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' \
   | xargs exa-crawl -c 8000
 
 # 按域名过滤
 exa-search "frameworks" --json \
-  | jq '[.results[] | select(.url | test("github\\.com"))]'
+  | jq '[(if type=="array" then . else (.results // []) end)[] | select(.url | test("github\\.com"))]'
 ```

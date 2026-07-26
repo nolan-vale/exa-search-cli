@@ -60,7 +60,7 @@ exa-search --similar https://github.com/astral-sh/uv
 exa-search "비전 언어 모델" --category "research paper" --start-date 2025-01-01
 
 # GitHub 저장소만, URL 목록 추출
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '.results[].url'
+exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
 # 어떤 페이지든 깔끔한 텍스트 추출
 exa-crawl https://example.com -c 8000
@@ -84,7 +84,7 @@ exa-research-status <research-id>   # 진행 상황 확인 / 결과 가져오기
 | `--include-domain` | — | 이 도메인만 포함 (쉼표 구분) |
 | `--exclude-domain` | — | 이 도메인 제외 (쉼표 구분) |
 | `--similar` | — | 이 URL과 유사한 페이지 검색 |
-| `--json` | off | 원시 JSON 출력 |
+| `--json` | off | 구조화된 JSON 출력 |
 
 → **[전체 문서](docs/USAGE.md)**（영어）
 
