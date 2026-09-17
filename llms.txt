@@ -1,6 +1,10 @@
 # exa-search-cli
 
-> CLI for Exa neural search, URL crawling, and deep research from terminal. Built for developers, scripts, and AI agents that need clean JSON output.
+> A command-line integration with Exa for repeatable research: web search, readable page-text retrieval, and external research tasks with structured output.
+
+## Contribution and scope
+
+Built with AI coding agents as part of Nolan Vale's independent product and workflow-automation work. Nolan defines requirements, directs implementation, checks results, and iterates. Exa provides the underlying search and research services; this repository supplies a CLI integration, not a new search engine or AI model.
 
 ## Install
 
@@ -8,61 +12,51 @@
 uv tool install exa-search-cli
 ```
 
-or:
+Alternatively, use pip install exa-search-cli in a suitable Python environment.
 
-```bash
-pip install exa-search-cli
-```
-
-Get API key at: https://exa.ai (free tier available)
+Set EXA_API_KEY to an authorized Exa API key. Do not commit or expose the key.
 
 ## Commands
 
-- `exa-search <query>` — neural web search. Flags: --json, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar <url>, --text
-- `exa-crawl <url>` — fetch full readable text from URL. Flags: --json, --max-chars
-- `exa-research <topic>` — AI deep research task. Flags: --json, --model
-- `exa-research-status <research-id>` — check status / fetch result of a research task. Flags: --json
+- `exa-search <query>`: search. Flags: --json, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar, --text.
+- `exa-crawl <url>`: request readable page text. Flags: --json, --max-chars.
+- `exa-research <topic>`: create a research task on Exa. Flags: --json, --model.
+- `exa-research-status <research-id>`: check a task and retrieve its result. Flags: --json.
 
-## Categories for exa-search --category
+Source access, categories, models, and result availability depend on the provider.
 
-news, tweet, github, paper, company, research paper, financial report, personal site, pdf, linkedin profile
-
-## Best for
-
-- AI agents
-- search automation
-- terminal workflows
-- JSON output
-- developer productivity
-
-## Quick examples
+## Workflow examples
 
 ```bash
-exa-search "transformer architecture" --category "research paper" --json
-exa-search --similar https://github.com/astral-sh/uv --json
+exa-search "document review workflow" --json
 exa-crawl https://example.com -c 8000
-exa-research "current state of quantum error correction" --json
-exa-research-status r_01k... --json
+exa-research "document processing approaches" --json
+exa-research-status <research-id> --json
 ```
 
-## JSON output
+## Output reference
 
-exa-search returns: results[]{title, url, published_date, author, highlights[], text}
-exa-crawl returns: results[]{url, title, text}
-exa-research / exa-research-status return: {research_id, model, instructions, status, output.content, error}
-Agent-safe jq result iterator: (if type=="array" then . else (.results // []) end)[]
+- Search: results[]{title, url, published_date, author, highlights[], text}.
+- Crawl: results[]{url, title, text}.
+- Research/status: {research_id, model, instructions, status, output.content, error}.
+- Result iterator for object or array responses: (if type=="array" then . else (.results // []) end)[].
+
+Consult README.md and docs/USAGE.md for examples and installed-command help for supported options.
+
+## Data and review
+
+Requests are sent to Exa. Research commands create external tasks, so the integration is not entirely read-only or offline. Protect credentials and review generated research against source material before using it in decisions.
 
 ## Key files
 
-- `README.md`: overview, install, quickstart
-- `AGENTS.md`: instructions for AI coding agents
-- `docs/USAGE.md`: full usage guide
-- `pyproject.toml`: package metadata and CLI entry points
+- README.md: purpose, contribution, setup, and limitations.
+- AGENTS.md: agent integration guidance.
+- docs/USAGE.md: usage reference.
+- pyproject.toml: dependencies and entry points.
 
 ## Links
 
-- GitHub: https://github.com/nolan-vale/exa-search-cli
+- Repository: https://github.com/nolan-vale/exa-search-cli
+- Product-builder portfolio: https://github.com/nolan-vale
 - PyPI: https://pypi.org/project/exa-search-cli/
-- Exa API docs: https://docs.exa.ai
-- Full CLI docs: https://github.com/nolan-vale/exa-search-cli/blob/main/docs/USAGE.md
-- For agents: https://github.com/nolan-vale/exa-search-cli/blob/main/AGENTS.md
+- Provider documentation: https://docs.exa.ai
