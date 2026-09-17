@@ -1,56 +1,35 @@
-<div align="center">
+# exa-search-cli
+
+**Research automation through a command-line integration with [Exa](https://exa.ai): search, page-text retrieval, and research tasks.**
 
 [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-<!--
-  COVER IMAGE — generate with this prompt, save as docs/cover.png, then uncomment below.
+[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=334155&label=PyPI)](https://pypi.org/project/exa-search-cli/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-334155.svg)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6B705C.svg)](LICENSE)
 
-  Prompt (Midjourney / DALL-E 3 / Stable Diffusion XL):
-  "A sleek dark terminal window filled with glowing cyan and blue search results streaming
-  in real-time, abstract neural network nodes forming a luminous web in the background,
-  minimalist developer aesthetic, pure black background, neon accent colors,
-  wide cinematic banner, 2:1 aspect ratio, no text, no UI chrome"
+## Practical purpose
 
-  <img src="docs/cover.png" alt="exa-cli" width="100%">
--->
+Turn recurring web research into a repeatable workflow: find relevant sources, retrieve readable text, and pass structured results to scripts or AI agents. Potential uses include gathering background information, comparing sources, and preparing research inputs for a document or decision.
 
-# exa-search-cli
+Exa supplies the underlying search and research services. This repository is a focused CLI integration, not a new search engine or AI model.
 
-CLI for [Exa](https://exa.ai) — neural web search, URL crawling, and AI deep research from the terminal.
+## Project contribution
 
-[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/nolan-vale/exa-search-cli?style=social)](https://github.com/nolan-vale/exa-search-cli)
-
-</div>
-
----
+Built with AI coding agents as part of [Nolan Vale's](https://github.com/nolan-vale) independent product and workflow-automation work. My contribution is defining the task and interface, directing AI-assisted implementation, checking results, and iterating. **Nolan Vale Tools** is the label for these independent public projects.
 
 ## What it does
 
-`exa-search-cli` wraps the [Exa API](https://exa.ai) in four terminal commands. Exa is a search API built for AI applications — it searches by meaning, not keywords, which means it finds relevant pages even when the exact words are not present in the content.
+Four commands wrap Exa services:
 
-`exa-search` searches the web. `exa-crawl` extracts clean readable text from any URL without HTML. `exa-research` submits a deep research task where Exa AI reads the web and synthesizes a structured answer; `exa-research-status` checks on that task and returns the result once it's ready.
+| Command | Purpose |
+|---|---|
+| `exa-search` | Search the web or find pages similar to a reference URL |
+| `exa-crawl` | Retrieve readable page text through Exa |
+| `exa-research` | Submit a research task to Exa |
+| `exa-research-status` | Check the task and retrieve its result |
 
-Every command outputs clean `--json` for use in scripts, pipelines, and AI agent workflows.
-
-## Who it is for
-
-- Developers who want web search access from shell scripts and automation pipelines
-- AI agent developers who need structured, parseable web search output
-- Researchers collecting, filtering, and crawling web content programmatically
-- Anyone using Claude Code, Codex, Cursor, or Windsurf who wants to give their agent web access
-
-## Features
-
-- Neural (semantic) search — finds pages by meaning, not keyword matching
-- Find pages similar to any URL
-- Filter by content type: `news`, `tweet`, `github`, `research paper`, `pdf`, and more
-- Filter by date range and domain
-- Full page text extraction from any URL (no HTML)
-- AI deep research tasks with synthesized answers
-- Clean `--json` output for every command
+The commands support `--json` for scripts and AI-agent workflows. Search can be narrowed by date, domain, and content category. Retrieval depends on the provider and the accessibility of the source; it is not guaranteed to work for every URL.
 
 ## Installation
 
@@ -58,89 +37,85 @@ Every command outputs clean `--json` for use in scripts, pipelines, and AI agent
 uv tool install exa-search-cli
 ```
 
-> No `uv`? Run `curl -LsSf https://astral.sh/uv/install.sh | sh`, or use `pip install exa-search-cli`.
+Alternatively, use `pip install exa-search-cli` in a suitable Python environment.
 
 ## Quick start
 
-Get your API key at [exa.ai](https://exa.ai) (free tier available):
+Obtain an Exa API key and keep it out of source control:
 
 ```bash
 export EXA_API_KEY=your-key-here
-exa-search "how do transformers work" --category "research paper"
+exa-search "document processing workflow" --json
 ```
 
 ## Usage
 
 ```bash
-# Neural search
-exa-search "vision language models 2025" -n 10
+# Search
+exa-search "vision language models" -n 10
 
-# Find similar pages to a URL
+# Find similar pages
 exa-search --similar https://github.com/astral-sh/uv
 
-# Filter by content type and date
+# Filter by content type and publication date
 exa-search "AI papers" --category "research paper" --start-date 2025-01-01
 
-# Only specific domains
+# Include or exclude domains
 exa-search "documentation" --include-domain docs.python.org,docs.rs
-
-# Exclude noisy domains
 exa-search "tutorial" --exclude-domain medium.com,dev.to
 
-# Crawl a page, get clean text
+# Retrieve page text
 exa-crawl https://example.com -c 8000
 
-# Deep research task
-exa-research "current state of quantum error correction"
-exa-research-status <research-id>   # check progress / fetch the result
+# Submit and retrieve an external research task
+exa-research "document review workflow approaches"
+exa-research-status <research-id>
 
-# JSON output for pipelines
+# Extract URLs from structured output
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
-**All flags — `exa-search`:**
+### Search flags
 
 | Flag | Default | Description |
 |---|---|---|
 | `-n` / `--num-results` | `8` | Number of results |
 | `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--text` | off | Fetch and show full page text |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` · `company` · `personal site` · `linkedin profile` · `financial report` |
+| `--text` | off | Request and display page text |
+| `--category` | — | Content category, subject to provider support |
 | `--start-date` | — | Published on or after `YYYY-MM-DD` |
 | `--end-date` | — | Published on or before `YYYY-MM-DD` |
-| `--include-domain` | — | Comma-separated domains to include only |
+| `--include-domain` | — | Comma-separated domains to include |
 | `--exclude-domain` | — | Comma-separated domains to exclude |
 | `--similar` | — | Find pages similar to this URL |
 | `--json` | off | Structured JSON output |
 
-**All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`
+Other options:
 
-**All flags — `exa-research`:** `-m` / `--model` (`exa-research-fast` · `exa-research` · `exa-research-pro`), `--json`
+- **`exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`.
+- **`exa-research`:** `-m` / `--model` (`exa-research-fast`, `exa-research`, `exa-research-pro`), `--json`. Model availability depends on Exa.
+- **`exa-research-status`:** `--json`.
 
-**All flags — `exa-research-status`:** `--json`
+See [full usage documentation](docs/USAGE.md) and the installed commands' `--help` for additional details.
 
-## AI agent usage
-
-`exa-search-cli` is stateless, read-only, and exits cleanly — designed to be called by AI coding assistants.
+## AI-agent workflows
 
 ```bash
-# Search and extract URLs (most common agent pattern)
+# Search and collect source URLs
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 
-# Search → crawl first result
+# Retrieve the first source
 exa-search "topic" --json \
   | jq -r '(if type=="array" then . else (.results // []) end)[0].url // empty' \
   | xargs exa-crawl -c 6000
 
-# Find similar pages to a reference URL
-exa-search --similar https://example.com --json
-
-# Deep research, get synthesized answer
+# Submit a research task, then retrieve the result
 exa-research "topic" --json
 exa-research-status <research-id> --json
 ```
 
-JSON schema for `exa-search --json`:
+Example search output:
+
 ```json
 {
   "results": [
@@ -150,28 +125,20 @@ JSON schema for `exa-search --json`:
       "published_date": "2025-01-15T00:00:00.000Z",
       "author": "...",
       "highlights": ["excerpt..."],
-      "text": "full text if --text was passed"
+      "text": "page text when requested and available"
     }
   ]
 }
 ```
 
-See [AGENTS.md](AGENTS.md) for full schemas, exit codes, and environment reference.
+See [AGENTS.md](AGENTS.md) for integration guidance and environment details.
 
-→ [Full documentation](docs/USAGE.md)
+## Scope and review
 
-## How this was built
+Queries and retrieval requests are sent to Exa. Research commands create tasks on that external service; this is not an entirely offline or read-only workflow. Keep API keys private, check source material, and review generated research before using it in a business decision.
 
-Spec first, then a plan, then implementation with AI coding agents (Claude Code, Codex). Every diff gets reviewed before merge, and releases go through tests and basic security checks. More on the process on the [Nolan Vale profile](https://github.com/nolan-vale).
+This project demonstrates a practical AI-assisted integration. It does not claim independently measured time savings, enterprise deployments, or an independent security audit. The provider's capabilities and availability remain outside this repository's control.
 
-## Project metadata
+## License
 
-- **Author:** Nolan Vale
-- **Brand:** Nolan Vale Tools
-- **Focus:** search automation, CLI workflows, AI-agent tooling, developer productivity
-- **License:** MIT
-
----
-
-Built by [Nolan Vale](https://github.com/nolan-vale)  
-Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+MIT — Nolan Vale. See [LICENSE](LICENSE).
