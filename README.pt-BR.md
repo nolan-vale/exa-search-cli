@@ -1,94 +1,48 @@
-<div align="center">
-
-← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
-
 # exa-search-cli
 
-**CLI para [Exa](https://exa.ai) — busca web neural, crawling de URLs e pesquisa com IA, no terminal.**
+**Integração de linha de comando com Exa para pesquisas repetíveis: busca, recuperação de texto e tarefas de pesquisa.**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
+[English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-</div>
+## Objetivo e contribuição
 
----
+Conecta os serviços existentes da Exa a scripts e agentes de IA. A Exa fornece a busca e a pesquisa; este repositório implementa uma integração CLI, não um mecanismo de busca ou modelo de IA próprio.
 
-`exa-cli` encapsula a [Exa API](https://exa.ai) em quatro comandos de terminal. Exa busca por significado, não por palavras-chave. Todos os comandos suportam `--json` para scripts, agentes de IA e pipelines.
+Criado com agentes de programação de IA como parte do trabalho independente de [Nolan Vale](https://github.com/nolan-vale). Sua contribuição é definir requisitos, orientar a implementação, verificar resultados e iterar.
 
-## Comece em 60 segundos
+## Instalação
 
-**Passo 1 — Instale:**
 ```bash
 uv tool install exa-search-cli
+export EXA_API_KEY=your-key
+exa-search "document review workflow" --json
 ```
 
-> Sem `uv`? Execute `curl -LsSf https://astral.sh/uv/install.sh | sh`, ou use `pip install exa-search-cli`.
-
-**Passo 2 — Obtenha sua chave de API:**  
-Acesse [exa.ai](https://exa.ai) → cadastre-se (plano gratuito disponível) → Dashboard → API Keys.
-
-**Passo 3 — Configure a chave:**
-```bash
-export EXA_API_KEY=sua-chave
-# Adicione ao ~/.zshrc ou ~/.bashrc para persistir
-```
-
-**Passo 4 — Pesquise:**
-```bash
-exa-search "como funcionam os transformers" --category "research paper"
-```
+Também é possível usar `pip install exa-search-cli` em um ambiente Python adequado. Obtenha uma chave da Exa e não a salve no repositório.
 
 ## Comandos
 
-| Comando | O que faz |
+| Comando | Objetivo |
 |---|---|
-| `exa-search <consulta>` | Busca web por significado. Filtros por tipo, data, domínio. Encontra páginas similares. |
-| `exa-crawl <url>` | Extrai texto limpo de qualquer URL, sem HTML. |
-| `exa-research <tópico>` | Inicia uma tarefa de pesquisa profunda e retorna um `research_id` imediatamente. |
-| `exa-research-status <research-id>` | Status / resultado de uma tarefa iniciada com `exa-research`. |
+| `exa-search <query>` | Buscar fontes ou páginas similares com filtros de data, domínio e categoria |
+| `exa-crawl <url>` | Solicitar texto legível de uma página pela Exa |
+| `exa-research <topic>` | Criar uma tarefa de pesquisa na Exa |
+| `exa-research-status <research-id>` | Consultar o status e obter o resultado |
 
-Todos os comandos aceitam `--json` para `jq`, scripts e agentes.
-
-## Exemplos
+Os comandos aceitam `--json`. A busca aceita `--num-results`, `--type`, `--text`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain` e `--similar`.
 
 ```bash
-# Encontrar páginas similares a uma URL
 exa-search --similar https://github.com/astral-sh/uv
-
-# Artigos de pesquisa de IA de 2025
-exa-search "modelos de linguagem visual" --category "research paper" --start-date 2025-01-01
-
-# Apenas repositórios GitHub, lista de URLs
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
-
-# Texto limpo de qualquer página
 exa-crawl https://example.com -c 8000
-
-# Pesquisa profunda com IA
-exa-research "estado atual da correção de erros quânticos"
-exa-research-status <research-id>   # verificar progresso / obter o resultado
+exa-research "document processing approaches" --json
+exa-research-status <research-id> --json
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
-## Referência de opções
+## Limites
 
-**`exa-search`**
+As solicitações são enviadas a um serviço externo. Os comandos de pesquisa criam tarefas na Exa; o fluxo não é totalmente local nem somente de leitura. A recuperação depende do provedor e do acesso à página; não é garantida para qualquer URL. Confira fontes e resultados gerados antes de usá-los.
 
-| Flag | Padrão | Descrição |
-|---|---|---|
-| `-n` / `--num-results` | `8` | Número de resultados |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` etc. |
-| `--start-date` | — | Publicado em ou após `YYYY-MM-DD` |
-| `--end-date` | — | Publicado em ou antes de `YYYY-MM-DD` |
-| `--include-domain` | — | Incluir apenas esses domínios (separados por vírgula) |
-| `--exclude-domain` | — | Excluir esses domínios (separados por vírgula) |
-| `--similar` | — | Encontrar páginas similares a esta URL |
-| `--json` | off | Saída JSON estruturada |
+[Documentação completa](docs/USAGE.md) · [Visão geral atualizada](README.md).
 
-→ **[Documentação completa](docs/USAGE.md)**（EN）
-
----
-
-Built by [Nolan Vale](https://github.com/nolan-vale)  
-Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+[MIT](LICENSE) — Nolan Vale. **Nolan Vale Tools** é o nome usado para seus projetos públicos independentes.

@@ -1,94 +1,48 @@
-<div align="center">
-
-← [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
-
 # exa-search-cli
 
-**[Exa](https://exa.ai) CLI — 뉴럴 웹 검색, URL 크롤링, AI 리서치를 터미널에서.**
+**반복적인 조사를 위한 Exa CLI 연동: 출처 검색, 페이지 텍스트 조회, 조사 작업을 지원합니다.**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
+[English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
 
-</div>
+## 목적과 기여
 
----
+기존 Exa 서비스를 스크립트와 AI 에이전트에 연결합니다. 검색과 조사 기능은 Exa가 제공하며, 이 저장소는 CLI 연동을 구현합니다. 자체 검색 엔진이나 AI 모델이 아닙니다.
 
-`exa-cli`는 [Exa API](https://exa.ai)를 네 개의 터미널 명령어로 감쌉니다. Exa는 키워드가 아닌 의미로 검색합니다. 모든 명령어는 스크립트, AI 에이전트, 파이프라인을 위한 `--json` 출력을 지원합니다.
+[Nolan Vale](https://github.com/nolan-vale)의 독립적인 제품 작업에서 코딩 에이전트와 함께 만들었습니다. 담당 역할은 요구사항 정의, AI 지원 구현 지시, 결과 확인, 반복 개선입니다.
 
-## 60초 시작 가이드
+## 설치
 
-**1단계 — 설치:**
 ```bash
 uv tool install exa-search-cli
+export EXA_API_KEY=your-key
+exa-search "document review workflow" --json
 ```
 
-> `uv`가 없다면 `curl -LsSf https://astral.sh/uv/install.sh | sh`를 실행하거나, `pip install exa-search-cli`를 사용하세요.
+적절한 Python 환경에서 `pip install exa-search-cli`도 사용할 수 있습니다. Exa에서 API 키를 발급받고 저장소에 올리지 마세요.
 
-**2단계 — API 키 발급:**  
-[exa.ai](https://exa.ai) → 회원가입 (무료 플랜 있음) → Dashboard → API Keys.
+## 명령
 
-**3단계 — 키 설정:**
-```bash
-export EXA_API_KEY=발급받은-키
-# ~/.zshrc 또는 ~/.bashrc에 추가하면 영구 적용됩니다
-```
-
-**4단계 — 검색:**
-```bash
-exa-search "트랜스포머 작동 원리" --category "research paper"
-```
-
-## 명령어
-
-| 명령어 | 기능 |
+| 명령 | 목적 |
 |---|---|
-| `exa-search <쿼리>` | 의미 기반 웹 검색. 타입·날짜·도메인 필터링. 유사 페이지 검색. |
-| `exa-crawl <url>` | 어떤 URL에서도 깔끔한 텍스트 추출 (HTML 없음). |
-| `exa-research <주제>` | 심층 리서치 태스크를 시작하고 `research_id`를 즉시 반환. |
-| `exa-research-status <research-id>` | `exa-research`로 시작한 태스크의 상태/결과 확인. |
+| `exa-search <query>` | 날짜, 도메인, 카테고리 필터로 출처 또는 유사 페이지 검색 |
+| `exa-crawl <url>` | Exa를 통해 읽기 쉬운 페이지 텍스트 요청 |
+| `exa-research <topic>` | Exa에 조사 작업 생성 |
+| `exa-research-status <research-id>` | 상태 확인과 결과 조회 |
 
-모든 명령어는 `--json` 지원 (`jq`, 스크립트, AI 에이전트와 연동 가능).
-
-## 예시
+각 명령은 `--json`을 지원합니다. 검색 옵션은 `--num-results`, `--type`, `--text`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain`, `--similar`입니다.
 
 ```bash
-# 어떤 URL과 유사한 페이지 찾기
 exa-search --similar https://github.com/astral-sh/uv
-
-# 2025년 AI 연구 논문
-exa-search "비전 언어 모델" --category "research paper" --start-date 2025-01-01
-
-# GitHub 저장소만, URL 목록 추출
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
-
-# 어떤 페이지든 깔끔한 텍스트 추출
 exa-crawl https://example.com -c 8000
-
-# AI 심층 리서치
-exa-research "양자 오류 수정의 현황"
-exa-research-status <research-id>   # 진행 상황 확인 / 결과 가져오기
+exa-research "document processing approaches" --json
+exa-research-status <research-id> --json
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
-## 옵션 레퍼런스
+## 제한
 
-**`exa-search`**
+요청은 외부 서비스로 전송됩니다. 조사 명령은 Exa에 작업을 생성하므로 완전한 로컬 처리나 읽기 전용 작업이 아닙니다. 텍스트 조회는 제공자 기능과 페이지 접근 가능 여부에 따라 달라지며 모든 URL에서 성공한다고 보장하지 않습니다. 생성된 결과는 원문 출처와 대조하세요.
 
-| 플래그 | 기본값 | 설명 |
-|---|---|---|
-| `-n` / `--num-results` | `8` | 반환할 결과 수 |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` 등 |
-| `--start-date` | — | 이 날짜 이후 게시 `YYYY-MM-DD` |
-| `--end-date` | — | 이 날짜 이전 게시 `YYYY-MM-DD` |
-| `--include-domain` | — | 이 도메인만 포함 (쉼표 구분) |
-| `--exclude-domain` | — | 이 도메인 제외 (쉼표 구분) |
-| `--similar` | — | 이 URL과 유사한 페이지 검색 |
-| `--json` | off | 구조화된 JSON 출력 |
+[전체 문서](docs/USAGE.md) · [최신 개요](README.md).
 
-→ **[전체 문서](docs/USAGE.md)**（영어）
-
----
-
-Built by [Nolan Vale](https://github.com/nolan-vale)  
-Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+[MIT](LICENSE) — Nolan Vale. **Nolan Vale Tools**는 독립적인 공개 프로젝트에 사용하는 이름입니다.

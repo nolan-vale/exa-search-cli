@@ -1,94 +1,48 @@
-<div align="center">
-
-← [English](README.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
-
 # exa-search-cli
 
-**[Exa](https://exa.ai) 的命令行工具 — 神经网络 Web 搜索、URL 爬取、AI 研究任务。**
+**用于重复性研究任务的 Exa 命令行集成：搜索来源、获取网页文本并提交研究任务。**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
+[English](README.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-</div>
+## 用途与贡献
 
----
+将现有 Exa 服务连接到脚本和 AI 代理。搜索与研究能力由 Exa 提供，本仓库实现的是 CLI 集成，并非自行开发的搜索引擎或 AI 模型。
 
-`exa-cli` 将 [Exa API](https://exa.ai) 封装为四个终端命令。Exa 按语义搜索，而非关键词匹配。所有命令支持 `--json` 输出，适合脚本、AI 代理和流水线使用。
+本项目由 [Nolan Vale](https://github.com/nolan-vale) 在独立产品实践中使用编码代理完成。其贡献包括定义需求、指导 AI 辅助实现、检查结果并迭代。
 
-## 60 秒上手
+## 安装
 
-**第一步 — 安装：**
 ```bash
 uv tool install exa-search-cli
+export EXA_API_KEY=your-key
+exa-search "document review workflow" --json
 ```
 
-> 没有 `uv`？先运行 `curl -LsSf https://astral.sh/uv/install.sh | sh`，或使用 `pip install exa-search-cli`。
-
-**第二步 — 获取 API 密钥：**  
-访问 [exa.ai](https://exa.ai) → 注册（有免费套餐）→ Dashboard → API Keys。
-
-**第三步 — 设置密钥：**
-```bash
-export EXA_API_KEY=你的密钥
-# 添加到 ~/.zshrc 或 ~/.bashrc 以永久生效
-```
-
-**第四步 — 搜索：**
-```bash
-exa-search "transformer 注意力机制" --category "research paper"
-```
+也可在合适的 Python 环境中使用 `pip install exa-search-cli`。请向 Exa 获取 API 密钥，不要将其提交到仓库。
 
 ## 命令
 
-| 命令 | 功能 |
+| 命令 | 用途 |
 |---|---|
-| `exa-search <查询>` | 语义 Web 搜索。支持类型过滤、日期范围、域名过滤、查找相似页面。 |
-| `exa-crawl <url>` | 获取任意 URL 的干净可读文本。 |
-| `exa-research <主题>` | 提交深度研究任务，立即返回 `research_id`。 |
-| `exa-research-status <research-id>` | 查询 `exa-research` 提交的任务的状态/结果。 |
+| `exa-search <query>` | 搜索来源或相似页面，支持日期、域名和类别过滤 |
+| `exa-crawl <url>` | 通过 Exa 请求可读网页文本 |
+| `exa-research <topic>` | 在 Exa 上创建研究任务 |
+| `exa-research-status <research-id>` | 查询状态并获取结果 |
 
-所有命令支持 `--json`（结构化输出，可与 `jq` 或 AI 代理配合使用）。
-
-## 示例
+各命令支持 `--json`。搜索参数包括 `--num-results`、`--type`、`--text`、`--category`、`--start-date`、`--end-date`、`--include-domain`、`--exclude-domain` 和 `--similar`。
 
 ```bash
-# 查找与任意 URL 相似的页面
 exa-search --similar https://github.com/astral-sh/uv
-
-# 2025 年的 AI 研究论文
-exa-search "视觉语言模型" --category "research paper" --start-date 2025-01-01
-
-# 只搜索 GitHub 仓库，输出 URL 列表
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
-
-# 抓取任意页面的干净文本
 exa-crawl https://example.com -c 8000
-
-# AI 深度研究
-exa-research "量子纠错的现状"
-exa-research-status <research-id>   # 查看进度 / 获取结果
+exa-research "document processing approaches" --json
+exa-research-status <research-id> --json
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
-## 参数参考
+## 限制
 
-**`exa-search`**
+请求会发送到外部服务。研究命令会在 Exa 上创建任务，因此该流程并非完全本地或只读。文本获取取决于服务提供方和页面可访问性，不保证支持所有 URL。使用生成结果前应核对来源。
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `-n` / `--num-results` | `8` | 返回结果数量 |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` 等 |
-| `--start-date` | — | 发布日期不早于 `YYYY-MM-DD` |
-| `--end-date` | — | 发布日期不晚于 `YYYY-MM-DD` |
-| `--include-domain` | — | 只包含这些域名（逗号分隔） |
-| `--exclude-domain` | — | 排除这些域名（逗号分隔） |
-| `--similar` | — | 查找与此 URL 相似的页面 |
-| `--json` | off | 结构化 JSON 输出 |
+[中文完整文档](docs/USAGE.zh-CN.md) · [English](docs/USAGE.md) · [最新概览](README.md)。
 
-→ **[完整文档](docs/USAGE.zh-CN.md)** · [English](docs/USAGE.md)
-
----
-
-Built by [Nolan Vale](https://github.com/nolan-vale)  
-Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+[MIT](LICENSE) — Nolan Vale。**Nolan Vale Tools** 是其独立公开项目所使用的名称。
