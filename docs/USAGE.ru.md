@@ -24,8 +24,11 @@ exa-search <запрос> [--similar <url>] [параметры]
 | Флаг | По умолчанию | Описание |
 |---|---|---|
 | `-n` / `--num-results` | `8` | Количество результатов |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--text` | off | Получить и показать полный текст страницы |
+| `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
+| `--text` | off | Получить текст; preview в терминале по умолчанию 2000 символов |
+| `--max-chars` | — | Лимит текста на результат; требует `--text` |
+| `--timeout` | `60` | HTTP connect/read timeout в секундах |
+| `--version` | — | Показать версию без credentials |
 | `--category` | — | Фильтр по типу контента (см. ниже) |
 | `--start-date` | — | Опубликовано после `YYYY-MM-DD` |
 | `--end-date` | — | Опубликовано до `YYYY-MM-DD` |
@@ -40,7 +43,7 @@ exa-search <запрос> [--similar <url>] [параметры]
 **Примеры:**
 ```bash
 exa-search "последние архитектуры больших языковых моделей" -n 10
-exa-search "transformer attention" --category "research paper" --start-date 2025-01-01
+exa-search "transformer attention" --category publication --start-date 2025-01-01
 exa-search "async rust" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 exa-search --similar https://github.com/astral-sh/uv
 exa-search "python туториал" --exclude-domain medium.com
@@ -121,3 +124,5 @@ exa-search "pytorch tutorial" --json \
 exa-search "frameworks" --json \
   | jq '[(if type=="array" then . else (.results // []) end)[] | select(.url | test("github\\.com"))]'
 ```
+
+Пакетное чтение: `exa-crawl URL1 URL2 -c 12000 --json` (до 100 URL). Текстовый вывод соблюдает `-c`. Подробнее об обработке ошибок и сохранённом JSON-контракте: [usage guide](USAGE.md#research-workflow-and-reliability-016).

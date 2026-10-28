@@ -36,7 +36,7 @@ export EXA_API_KEY=твой-ключ
 
 **Шаг 4 — Поиск:**
 ```bash
-exa-search "как работают трансформеры" --category "research paper"
+exa-search "как работают трансформеры" --category publication
 ```
 
 ## Команды
@@ -57,7 +57,7 @@ exa-search "как работают трансформеры" --category "resear
 exa-search --similar https://github.com/astral-sh/uv
 
 # Исследовательские статьи 2025 года
-exa-search "vision language models" --category "research paper" --start-date 2025-01-01
+exa-search "vision language models" --category publication --start-date 2025-01-01
 
 # Только GitHub-репозитории, список URL
 exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
@@ -77,8 +77,8 @@ exa-research-status <research-id>   # проверить статус / полу
 | Флаг | По умолчанию | Описание |
 |---|---|---|
 | `-n` / `--num-results` | `8` | Количество результатов |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` и др. |
+| `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
+| `--category` | — | `publication` · `people` · `company` · `news` · `personal site` · `financial report`; прежние flags сохранены |
 | `--start-date` | — | Опубликовано после `YYYY-MM-DD` |
 | `--end-date` | — | Опубликовано до `YYYY-MM-DD` |
 | `--include-domain` | — | Только эти домены (через запятую) |
@@ -92,3 +92,13 @@ exa-research-status <research-id>   # проверить статус / полу
 
 Built by [Nolan Vale](https://github.com/nolan-vale)  
 Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+
+## Обновления для ресерча
+
+`--category publication` ищет научные публикации; `paper` и `research paper`
+работают как его aliases. `--text --max-chars 8000` ограничивает текст каждого
+результата. `exa-crawl URL1 URL2 -c 12000 --json` читает несколько URL одним
+запросом, а текстовый вывод соблюдает `-c` без прежнего обрезания до 2000 символов.
+Все команды поддерживают `--version` и `--timeout` (по умолчанию 60 секунд).
+Ошибки аргументов и API не смешиваются с JSON; ключи скрываются в диагностике.
+Подробности — в [usage guide](docs/USAGE.md#research-workflow-and-reliability-016).

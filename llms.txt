@@ -25,7 +25,7 @@ Get API key at: https://exa.ai (free tier available)
 
 ## Categories for exa-search --category
 
-news, tweet, github, paper, company, research paper, financial report, personal site, pdf, linkedin profile
+publication, people, company, news, personal site, financial report; legacy flags: tweet, github, paper, research paper, pdf, linkedin profile
 
 ## Best for
 
@@ -38,7 +38,7 @@ news, tweet, github, paper, company, research paper, financial report, personal 
 ## Quick examples
 
 ```bash
-exa-search "transformer architecture" --category "research paper" --json
+exa-search "transformer architecture" --category publication --json
 exa-search --similar https://github.com/astral-sh/uv --json
 exa-crawl https://example.com -c 8000
 exa-research "current state of quantum error correction" --json
@@ -66,3 +66,14 @@ Agent-safe jq result iterator: (if type=="array" then . else (.results // []) en
 - Exa API docs: https://docs.exa.ai
 - Full CLI docs: https://github.com/nolan-vale/exa-search-cli/blob/main/docs/USAGE.md
 - For agents: https://github.com/nolan-vale/exa-search-cli/blob/main/AGENTS.md
+
+## Research workflow (0.1.6)
+
+- `--category publication`: scholarly sources; paper/research paper map to publication.
+- Current types include auto, lite, fast, instant, deep-lite, deep, deep-reasoning; legacy keyword/neural remain accepted.
+- `exa-search QUERY --text --max-chars 8000 --json`: bounded text per result; text and highlights are not requested together.
+- `exa-crawl URL1 URL2 -c 12000 --json`: batch up to 100 URLs in one request; terminal output honors -c.
+- All commands: --timeout SECONDS (default 60), --version. No automatic retries.
+- Invalid arguments exit 2 before network calls; API failures exit nonzero with stderr diagnostics and redacted keys.
+- Crawl JSON preserves per-URL statuses; partial failures warn on stderr, all failures exit 1.
+- Search is discovery, not bibliographic verification; confirm metadata at the primary source. Crawl extracts text, not original PDF files.

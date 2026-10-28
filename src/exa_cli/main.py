@@ -8,10 +8,21 @@ import textwrap
 from exa_py import Exa
 from exa_py.api import ContentsOptions
 
+from exa_cli._common import (
+    add_common_args,
+    api_call,
+    http_url,
+    iso_date,
+    positive_int,
+    result_count,
+)
+
 TEXT_PREVIEW_LEN = 2000
 RESULT_LIST_KEYS = ("results", "data", "items")
 
 CATEGORIES = [
+    "publication",
+    "people",
     "news",
     "tweet",
     "github",
@@ -25,11 +36,11 @@ CATEGORIES = [
 ]
 
 
-def _client() -> Exa:
-    key = os.environ.get("EXA_API_KEY")
+def _client(timeout: float = 60) -> Exa:
+    key = os.environ.get("EXA_API_KEY", "").strip()
     if not key:
         sys.exit("EXA_API_KEY not set. Export your key: export EXA_API_KEY=your-key")
-    return Exa(api_key=key)
+    return Exa(api_key=key, timeout=timeout)
 
 
 def _to_serializable(obj):
@@ -89,14 +100,14 @@ def _clean(text: str) -> str:
     return "\n".join(lines).strip()
 
 
-def _snippet(r, full_text: bool = False) -> str:
+def _snippet(r, full_text: bool = False, max_chars: int = TEXT_PREVIEW_LEN) -> str:
     text = getattr(r, "text", None) or ""
     highlights = getattr(r, "highlights", None) or []
 
     if full_text and text:
-        preview = text[:TEXT_PREVIEW_LEN]
-        tail = "…" if len(text) > TEXT_PREVIEW_LEN else ""
-        return textwrap.fill(preview + tail, width=100)
+        preview = text[:max_chars]
+        tail = "…" if len(text) > max_chars else ""
+        return preview + tail
 
     if highlights:
         parts = []
@@ -113,12 +124,14 @@ def _snippet(r, full_text: bool = False) -> str:
     return ""
 
 
-def _print_results(results, response, full_text: bool = False) -> None:
+def _print_results(
+    results, response, full_text: bool = False, max_chars: int = TEXT_PREVIEW_LEN
+) -> None:
     for i, r in enumerate(results, 1):
         title = getattr(r, "title", None) or "(no title)"
         url = getattr(r, "url", "") or getattr(r, "id", "")
         meta = _meta(r)
-        snippet = _snippet(r, full_text)
+        snippet = _snippet(r, full_text, max_chars)
 
         print(f"[{i}] {title}")
         print(f"    {url}")
@@ -156,11 +169,31 @@ def search() -> None:
 """,
     )
     p.add_argument("query", nargs="?", help="search query (omit when using --similar)")
-    p.add_argument("-n", "--num-results", type=int, default=8)
+    p.add_argument("-n", "--num-results", type=result_count, default=8)
     p.add_argument(
-        "-t", "--type", choices=["auto", "keyword", "neural"], default="auto"
+        "-t",
+        "--type",
+        choices=[
+            "auto",
+            "lite",
+            "fast",
+            "instant",
+            "deep-lite",
+            "deep",
+            "deep-reasoning",
+            "keyword",
+            "neural",
+        ],
+        default="auto",
     )
-    p.add_argument("--text", action="store_true", help="fetch and show full page text")
+    p.add_argument(
+        "--text",
+        action="store_true",
+        help="fetch page text (terminal preview: 2000 chars)",
+    )
+    p.add_argument(
+        "--max-chars", type=positive_int, help="text limit per result; requires --text"
+    )
     p.add_argument(
         "--category",
         choices=CATEGORIES,
@@ -168,10 +201,16 @@ def search() -> None:
         help=f"filter by content type: {', '.join(CATEGORIES)}",
     )
     p.add_argument(
-        "--start-date", metavar="YYYY-MM-DD", help="published on or after this date"
+        "--start-date",
+        type=iso_date,
+        metavar="YYYY-MM-DD",
+        help="published on or after this date",
     )
     p.add_argument(
-        "--end-date", metavar="YYYY-MM-DD", help="published on or before this date"
+        "--end-date",
+        type=iso_date,
+        metavar="YYYY-MM-DD",
+        help="published on or before this date",
     )
     p.add_argument(
         "--include-domain",
@@ -183,18 +222,38 @@ def search() -> None:
         metavar="DOMAINS",
         help="exclude these domains (comma-separated)",
     )
-    p.add_argument("--similar", metavar="URL", help="find pages similar to this URL")
+    p.add_argument(
+        "--similar", type=http_url, metavar="URL", help="find pages similar to this URL"
+    )
     p.add_argument("--json", action="store_true", help="structured JSON output")
+    add_common_args(p)
     args = p.parse_args()
 
-    if not args.query and not args.similar:
+    if not (args.query and args.query.strip()) and not args.similar:
         p.error("provide a query or --similar URL")
+    if args.max_chars and not args.text:
+        p.error("--max-chars requires --text")
+    if args.start_date and args.end_date and args.start_date > args.end_date:
+        p.error("--start-date must be on or before --end-date")
+    category = (
+        "publication" if args.category in ("paper", "research paper") else args.category
+    )
+    if category in ("company", "people") and (args.start_date or args.end_date):
+        p.error("date filters are not supported for company/people categories")
+    if category == "people" and args.exclude_domain:
+        p.error("--exclude-domain is not supported for the people category")
+    for name in ("include_domain", "exclude_domain"):
+        value = getattr(args, name)
+        if value is not None and not _split_domains(value):
+            p.error(f"--{name.replace('_', '-')} must contain at least one domain")
 
-    exa = _client()
-    highlights = {"num_sentences": 5, "highlights_per_url": 2}
-    contents = ContentsOptions(
-        text=True if args.text else False,
-        highlights=highlights,
+    exa = _client(args.timeout)
+    contents = (
+        ContentsOptions(
+            text={"max_characters": args.max_chars} if args.max_chars else True
+        )
+        if args.text
+        else ContentsOptions(highlights=True)
     )
 
     kwargs: dict = dict(
@@ -202,28 +261,35 @@ def search() -> None:
         type=args.type,
         contents=contents,
     )
-    if args.category:
-        kwargs["category"] = args.category
+    if category:
+        kwargs["category"] = category
     if args.start_date:
-        kwargs["start_published_date"] = args.start_date
+        kwargs["start_published_date"] = f"{args.start_date}T00:00:00.000Z"
     if args.end_date:
-        kwargs["end_published_date"] = args.end_date
+        kwargs["end_published_date"] = f"{args.end_date}T23:59:59.999Z"
     if args.include_domain:
         kwargs["include_domains"] = _split_domains(args.include_domain)
     if args.exclude_domain:
         kwargs["exclude_domains"] = _split_domains(args.exclude_domain)
 
     if args.similar:
-        result = exa.find_similar(
-            args.similar, **{k: v for k, v in kwargs.items() if k not in ("type",)}
+        result = api_call(
+            exa.find_similar,
+            args.similar,
+            **{k: v for k, v in kwargs.items() if k not in ("type",)},
         )
     else:
-        result = exa.search(args.query, **kwargs)
+        result = api_call(exa.search, args.query, **kwargs)
 
     if args.json:
         _dump_json(_results_json_payload(result))
     else:
-        _print_results(result.results, result, full_text=args.text)
+        _print_results(
+            result.results,
+            result,
+            full_text=args.text,
+            max_chars=args.max_chars or TEXT_PREVIEW_LEN,
+        )
 
 
 def crawl() -> None:
@@ -236,24 +302,40 @@ def crawl() -> None:
   exa-crawl https://example.com --json
 """,
     )
-    p.add_argument("url")
+    p.add_argument("url", nargs="+", type=http_url, help="one or more URLs (up to 100)")
     p.add_argument(
         "-c",
         "--max-chars",
-        type=int,
+        type=positive_int,
         default=5000,
         help="max characters to return (default: 5000)",
     )
     p.add_argument("--json", action="store_true", help="structured JSON output")
+    add_common_args(p)
     args = p.parse_args()
+    if len(args.url) > 100:
+        p.error("at most 100 URLs may be requested at once")
 
-    exa = _client()
-    result = exa.get_contents([args.url], text={"max_characters": args.max_chars})
+    exa = _client(args.timeout)
+    result = api_call(
+        exa.get_contents, args.url, text={"max_characters": args.max_chars}
+    )
 
+    payload = _results_json_payload(result)
     if args.json:
-        _dump_json(_results_json_payload(result))
+        _dump_json(payload)
     else:
-        _print_results(result.results, result, full_text=True)
+        _print_results(result.results, result, full_text=True, max_chars=args.max_chars)
+    failures = [
+        item for item in payload.get("statuses") or [] if item.get("status") == "error"
+    ]
+    if failures:
+        print(
+            f"Exa could not retrieve {len(failures)} URL(s); see statuses in --json output",
+            file=sys.stderr,
+        )
+        if not payload["results"]:
+            raise SystemExit(1)
 
 
 def research() -> None:
@@ -274,10 +356,13 @@ def research() -> None:
         choices=["exa-research-fast", "exa-research", "exa-research-pro"],
     )
     p.add_argument("--json", action="store_true", help="structured JSON output")
+    add_common_args(p)
     args = p.parse_args()
 
-    exa = _client()
-    result = exa.research.create(instructions=args.topic, model=args.model)
+    if not args.topic.strip():
+        p.error("topic must not be empty")
+    exa = _client(args.timeout)
+    result = api_call(exa.research.create, instructions=args.topic, model=args.model)
 
     if args.json:
         _dump_json(result)
@@ -300,10 +385,11 @@ def research_status() -> None:
     )
     p.add_argument("research_id")
     p.add_argument("--json", action="store_true", help="structured JSON output")
+    add_common_args(p)
     args = p.parse_args()
 
-    exa = _client()
-    result = exa.research.get(args.research_id)
+    exa = _client(args.timeout)
+    result = api_call(exa.research.get, args.research_id)
 
     if args.json:
         _dump_json(result)

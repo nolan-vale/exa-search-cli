@@ -66,7 +66,7 @@ Get your API key at [exa.ai](https://exa.ai) (free tier available):
 
 ```bash
 export EXA_API_KEY=your-key-here
-exa-search "how do transformers work" --category "research paper"
+exa-search "how do transformers work" --category publication
 ```
 
 ## Usage
@@ -79,7 +79,7 @@ exa-search "vision language models 2025" -n 10
 exa-search --similar https://github.com/astral-sh/uv
 
 # Filter by content type and date
-exa-search "AI papers" --category "research paper" --start-date 2025-01-01
+exa-search "AI papers" --category publication --start-date 2025-01-01
 
 # Only specific domains
 exa-search "documentation" --include-domain docs.python.org,docs.rs
@@ -102,16 +102,19 @@ exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []
 
 | Flag | Default | Description |
 |---|---|---|
-| `-n` / `--num-results` | `8` | Number of results |
-| `-t` / `--type` | `auto` | `auto` · `keyword` · `neural` |
-| `--text` | off | Fetch and show full page text |
-| `--category` | — | `news` · `tweet` · `github` · `research paper` · `pdf` · `company` · `personal site` · `linkedin profile` · `financial report` |
+| `-n` / `--num-results` | `8` | Number of results (1–100) |
+| `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
+| `--text` | off | Fetch page text; terminal preview defaults to 2000 characters |
+| `--max-chars` | — | Text limit per result, used with `--text` |
+| `--category` | — | `publication` · `people` · `company` · `news` · `personal site` · `financial report`; legacy flags remain accepted |
 | `--start-date` | — | Published on or after `YYYY-MM-DD` |
 | `--end-date` | — | Published on or before `YYYY-MM-DD` |
 | `--include-domain` | — | Comma-separated domains to include only |
 | `--exclude-domain` | — | Comma-separated domains to exclude |
 | `--similar` | — | Find pages similar to this URL |
 | `--json` | off | Structured JSON output |
+| `--timeout` | `60` | HTTP connect/read timeout in seconds |
+| `--version` | — | Show package version without authentication |
 
 **All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`
 
@@ -156,7 +159,7 @@ JSON schema for `exa-search --json`:
 }
 ```
 
-See [AGENTS.md](AGENTS.md) for full schemas, exit codes, and environment reference.
+See [the usage guide](docs/USAGE.md) for schemas, exit codes, and environment reference.
 
 → [Full documentation](docs/USAGE.md)
 
@@ -175,3 +178,13 @@ Spec first, then a plan, then implementation with AI coding agents (Claude Code,
 
 Built by [Nolan Vale](https://github.com/nolan-vale)  
 Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+
+## Research workflow updates
+
+Search scholarly sources with `--category publication` (`paper` and `research paper`
+are aliases). Use `--text --max-chars 8000` to cap text per result, or batch up to
+100 selected URLs in `exa-crawl URL1 URL2 -c 12000 --json`. The crawl terminal
+output now honors `-c` beyond 2000 characters. All commands support `--timeout`
+(default 60 seconds) and `--version`. Argument validation and credential-safe
+API diagnostics keep failures separate from JSON results. See the
+[usage guide](docs/USAGE.md#research-workflow-and-reliability-016).
