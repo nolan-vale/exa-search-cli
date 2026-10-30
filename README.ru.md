@@ -1,104 +1,60 @@
-<div align="center">
-
-← [English](README.md) · [中文](README.zh-CN.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
-
 # exa-search-cli
 
-**CLI для [Exa](https://exa.ai) — нейронный поиск, краулинг URL и AI-исследования из терминала.**
+**Командная интеграция с Exa для повторяемых исследований: поиск источников, получение текста страниц и исследовательские задачи.**
 
-[![PyPI](https://img.shields.io/pypi/v/exa-search-cli?color=0ea5e9&label=PyPI)](https://pypi.org/project/exa-search-cli/)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-0ea5e9.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/license-MIT-0ea5e9.svg)](../LICENSE)
+[English](README.md) · [中文](README.zh-CN.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-</div>
+## Назначение и вклад
 
----
+Инструмент связывает существующие сервисы Exa со скриптами и AI-агентами. Поиск и исследовательские возможности предоставляет Exa; этот репозиторий — CLI-интеграция, а не собственная поисковая система или AI-модель.
 
-`exa-cli` оборачивает [Exa API](https://exa.ai) в четыре команды терминала. Exa ищет по смыслу, а не по ключевым словам. Все команды поддерживают `--json` для скриптов, AI-агентов и пайплайнов.
+Создан с coding-агентами в рамках независимых проектов [Nolan Vale](https://github.com/nolan-vale). Мой вклад: постановка задачи, требования к интерфейсу, направление реализации с AI, проверка результата и итерации.
 
-## Запустить за 60 секунд
+## Установка
 
-**Шаг 1 — Установка:**
 ```bash
 uv tool install exa-search-cli
+export EXA_API_KEY=your-key
+exa-search "document review workflow" --json
 ```
 
-> Нет `uv`? Запусти `curl -LsSf https://astral.sh/uv/install.sh | sh`, или используй `pip install exa-search-cli`.
-
-**Шаг 2 — Получи API-ключ:**  
-Зайди на [exa.ai](https://exa.ai) → зарегистрируйся (есть бесплатный тариф) → Dashboard → API Keys.
-
-**Шаг 3 — Укажи ключ:**
-```bash
-export EXA_API_KEY=твой-ключ
-# Добавь в ~/.zshrc или ~/.bashrc чтобы не вводить каждый раз
-```
-
-**Шаг 4 — Поиск:**
-```bash
-exa-search "как работают трансформеры" --category publication
-```
+Можно использовать `pip install exa-search-cli` в подходящем Python-окружении. Получите ключ у Exa и не сохраняйте его в репозитории.
 
 ## Команды
 
-| Команда | Что делает |
+| Команда | Назначение |
 |---|---|
-| `exa-search <запрос>` | Веб-поиск по смыслу. Фильтры по типу, дате, домену. Поиск похожих страниц. |
-| `exa-crawl <url>` | Чистый текст любой страницы без HTML. |
-| `exa-research <тема>` | Запускает задачу глубокого исследования и сразу возвращает `research_id`. |
-| `exa-research-status <research-id>` | Статус / результат задачи, запущенной через `exa-research`. |
+| `exa-search <query>` | Поиск и поиск похожих страниц; фильтры по дате, домену и категории |
+| `exa-crawl <url>` | Запрос читаемого текста страницы через Exa |
+| `exa-research <topic>` | Создание исследовательской задачи на стороне Exa |
+| `exa-research-status <research-id>` | Проверка статуса и получение результата задачи |
 
-Все команды принимают `--json` — для `jq`, скриптов и агентов.
-
-## Примеры
+Команды поддерживают `--json`, `--timeout` и `--version`. Для поиска доступны `--num-results`, `--type`, `--text`, `--max-chars`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain`, `--similar`, `--objective`, `--max-age-hours` и `--compact`. Для `exa-crawl` добавлены `--query`, `--max-age-hours` и `--compact`; несколько URL можно передать одним запросом.
 
 ```bash
-# Найти похожие страницы по URL
 exa-search --similar https://github.com/astral-sh/uv
-
-# Исследовательские статьи 2025 года
-exa-search "vision language models" --category publication --start-date 2025-01-01
-
-# Только GitHub-репозитории, список URL
-exa-search "async rust runtime" --include-domain github.com --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
-
-# Получить текст страницы без HTML
 exa-crawl https://example.com -c 8000
-
-# Глубокое AI-исследование темы
-exa-research "текущее состояние квантовой коррекции ошибок"
-exa-research-status <research-id>   # проверить статус / получить результат
+exa-research "document processing approaches" --json
+exa-research-status <research-id> --json
+exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 
-## Параметры
+## Для исследовательского workflow
 
-**`exa-search`**
+`--category publication` ищет научные публикации; `paper` и `research paper` остаются aliases. `--objective` передаёт цель поиска и предпочтения источников. `exa-crawl --query` извлекает фрагменты по вопросу со всей страницы, а `-c` ограничивает их объём. `--max-age-hours` управляет возрастом контента: `0` — свежий fetch, `-1` — только cache, `1–720` — допустимый возраст в часах. Search type `lite` не принимает этот параметр.
 
-| Флаг | По умолчанию | Описание |
-|---|---|---|
-| `-n` / `--num-results` | `8` | Количество результатов |
-| `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
-| `--category` | — | `publication` · `people` · `company` · `news` · `personal site` · `financial report`; прежние flags сохранены |
-| `--start-date` | — | Опубликовано после `YYYY-MM-DD` |
-| `--end-date` | — | Опубликовано до `YYYY-MM-DD` |
-| `--include-domain` | — | Только эти домены (через запятую) |
-| `--exclude-domain` | — | Исключить эти домены (через запятую) |
-| `--similar` | — | Найти похожие страницы по URL |
-| `--json` | off | Структурированный JSON-вывод |
+`--compact` возвращает JSON в одну строку без пустых и декоративных полей, сохраняя содержание, ссылки, стоимость и статусы. Обычный `--json` совместим с прежним форматом. При достижении лимита полного текста stderr предупреждает о возможной неполноте; дополнительных запросов автоматически не выполняется.
 
-→ **[Полная документация](docs/USAGE.ru.md)** · [English](docs/USAGE.md)
+```bash
+exa-crawl https://www2.myfloridalicense.com/electrical-contractors/faqs/ \
+  --query "Is a license required to install low voltage network wiring?" \
+  -c 2500 --compact
+```
 
----
+## Ограничения
 
-Built by [Nolan Vale](https://github.com/nolan-vale)  
-Part of **Nolan Vale Tools** — practical open-source utilities for search, automation, AI agents, and developer workflows.
+Запросы передаются внешнему сервису. Исследовательские команды создают задачи у Exa, поэтому процесс нельзя считать полностью локальным или только читающим. Получение текста зависит от доступности страницы и возможностей провайдера; поддержка любого URL не гарантируется. Проверяйте источники и сгенерированные выводы перед использованием.
 
-## Обновления для ресерча
+[Полная документация на русском](docs/USAGE.ru.md) · [English](docs/USAGE.md) · [Актуальный обзор](README.md).
 
-`--category publication` ищет научные публикации; `paper` и `research paper`
-работают как его aliases. `--text --max-chars 8000` ограничивает текст каждого
-результата. `exa-crawl URL1 URL2 -c 12000 --json` читает несколько URL одним
-запросом, а текстовый вывод соблюдает `-c` без прежнего обрезания до 2000 символов.
-Все команды поддерживают `--version` и `--timeout` (по умолчанию 60 секунд).
-Ошибки аргументов и API не смешиваются с JSON; ключи скрываются в диагностике.
-Подробности — в [usage guide](docs/USAGE.md#research-workflow-and-reliability-016).
+[MIT](LICENSE) — Nolan Vale. **Nolan Vale Tools** — название независимых публичных проектов.
