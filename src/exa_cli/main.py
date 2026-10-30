@@ -11,11 +11,13 @@ from exa_py.api import ContentsOptions
 from exa_cli._common import (
     add_common_args,
     api_call,
+    cache_age_hours,
     http_url,
     iso_date,
     positive_int,
     result_count,
 )
+from exa_cli._output import compact_payload, warn_text_limit
 
 TEXT_PREVIEW_LEN = 2000
 RESULT_LIST_KEYS = ("results", "data", "items")
@@ -81,8 +83,33 @@ def _results_json_payload(response) -> dict:
     return {"results": [], "value": data}
 
 
-def _dump_json(data) -> None:
-    print(json.dumps(data, default=_to_serializable, ensure_ascii=False, indent=2))
+def _dump_json(data, compact: bool = False) -> None:
+    if compact:
+        data = compact_payload(data)
+    print(
+        json.dumps(
+            data,
+            default=_to_serializable,
+            ensure_ascii=False,
+            indent=None if compact else 2,
+            separators=(",", ":") if compact else None,
+        )
+    )
+
+
+def _add_source_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--json", action="store_true", help="structured JSON output")
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="compact JSON with source evidence, costs and statuses; implies --json",
+    )
+    parser.add_argument(
+        "--max-age-hours",
+        type=cache_age_hours,
+        metavar="HOURS",
+        help="content freshness: 0 = fetch fresh, -1 = cache only, 1-720 = max age",
+    )
 
 
 def _meta(r) -> str:
@@ -225,7 +252,11 @@ def search() -> None:
     p.add_argument(
         "--similar", type=http_url, metavar="URL", help="find pages similar to this URL"
     )
-    p.add_argument("--json", action="store_true", help="structured JSON output")
+    p.add_argument(
+        "--objective",
+        help="broader search goal and source preferences (up to 4096 characters)",
+    )
+    _add_source_args(p)
     add_common_args(p)
     args = p.parse_args()
 
@@ -233,6 +264,13 @@ def search() -> None:
         p.error("provide a query or --similar URL")
     if args.max_chars and not args.text:
         p.error("--max-chars requires --text")
+    if args.objective is not None:
+        if not args.objective.strip() or len(args.objective) > 4096:
+            p.error("--objective must be non-blank and at most 4096 characters")
+        if args.similar:
+            p.error("--objective is not supported with --similar")
+    if args.type == "lite" and args.max_age_hours is not None and not args.similar:
+        p.error("--max-age-hours is not supported with --type lite; use auto or crawl")
     if args.start_date and args.end_date and args.start_date > args.end_date:
         p.error("--start-date must be on or before --end-date")
     category = (
@@ -255,12 +293,16 @@ def search() -> None:
         if args.text
         else ContentsOptions(highlights=True)
     )
+    if args.max_age_hours is not None:
+        contents["max_age_hours"] = args.max_age_hours
 
     kwargs: dict = dict(
         num_results=args.num_results,
         type=args.type,
         contents=contents,
     )
+    if args.objective is not None:
+        kwargs["objective"] = args.objective
     if category:
         kwargs["category"] = category
     if args.start_date:
@@ -281,8 +323,9 @@ def search() -> None:
     else:
         result = api_call(exa.search, args.query, **kwargs)
 
-    if args.json:
-        _dump_json(_results_json_payload(result))
+    payload = _results_json_payload(result)
+    if args.json or args.compact:
+        _dump_json(payload, compact=args.compact)
     else:
         _print_results(
             result.results,
@@ -290,11 +333,13 @@ def search() -> None:
             full_text=args.text,
             max_chars=args.max_chars or TEXT_PREVIEW_LEN,
         )
+    if args.text and args.max_chars:
+        warn_text_limit(payload, args.max_chars)
 
 
 def crawl() -> None:
     p = argparse.ArgumentParser(
-        description="Exa URL crawl — extract full page content",
+        description="Exa URL crawl — extract readable text or query-focused excerpts",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""examples:
   exa-crawl https://example.com
@@ -310,22 +355,38 @@ def crawl() -> None:
         default=5000,
         help="max characters to return (default: 5000)",
     )
-    p.add_argument("--json", action="store_true", help="structured JSON output")
+    p.add_argument(
+        "--query",
+        help="extract query-focused highlights from the whole page instead of its start",
+    )
+    _add_source_args(p)
     add_common_args(p)
     args = p.parse_args()
     if len(args.url) > 100:
         p.error("at most 100 URLs may be requested at once")
+    if args.query is not None and not args.query.strip():
+        p.error("--query must not be blank")
 
     exa = _client(args.timeout)
-    result = api_call(
-        exa.get_contents, args.url, text={"max_characters": args.max_chars}
-    )
+    if args.query is not None:
+        # Explicit False prevents the SDK from adding a full-text request.
+        options = {
+            "text": False,
+            "highlights": {"query": args.query, "max_characters": args.max_chars},
+        }
+    else:
+        options = {"text": {"max_characters": args.max_chars}}
+    if args.max_age_hours is not None:
+        options["max_age_hours"] = args.max_age_hours
+    result = api_call(exa.get_contents, args.url, **options)
 
     payload = _results_json_payload(result)
-    if args.json:
-        _dump_json(payload)
+    if args.json or args.compact:
+        _dump_json(payload, compact=args.compact)
     else:
         _print_results(result.results, result, full_text=True, max_chars=args.max_chars)
+    if args.query is None:
+        warn_text_limit(payload, args.max_chars)
     failures = [
         item for item in payload.get("statuses") or [] if item.get("status") == "error"
     ]

@@ -59,6 +59,16 @@ def positive_seconds(value: str) -> float:
     return parsed
 
 
+def cache_age_hours(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be an integer from -1 to 720") from exc
+    if not -1 <= parsed <= 720:
+        raise argparse.ArgumentTypeError("must be between -1 and 720")
+    return parsed
+
+
 def add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--timeout",

@@ -18,8 +18,8 @@ Get API key at: https://exa.ai (free tier available)
 
 ## Commands
 
-- `exa-search <query>` — neural web search. Flags: --json, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar <url>, --text
-- `exa-crawl <url>` — fetch full readable text from URL. Flags: --json, --max-chars
+- `exa-search <query>` — neural web search. Flags: --json, --compact, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar <url>, --text, --max-chars, --objective, --max-age-hours
+- `exa-crawl <url>` — fetch readable text or focused excerpts. Flags: --json, --compact, --max-chars, --query, --max-age-hours
 - `exa-research <topic>` — AI deep research task. Flags: --json, --model
 - `exa-research-status <research-id>` — check status / fetch result of a research task. Flags: --json
 
@@ -77,3 +77,11 @@ Agent-safe jq result iterator: (if type=="array" then . else (.results // []) en
 - Invalid arguments exit 2 before network calls; API failures exit nonzero with stderr diagnostics and redacted keys.
 - Crawl JSON preserves per-URL statuses; partial failures warn on stderr, all failures exit 1.
 - Search is discovery, not bibliographic verification; confirm metadata at the primary source. Crawl extracts text, not original PDF files.
+
+## Focused retrieval
+
+- `exa-search QUERY --objective "Prefer original pricing pages, not directories" --compact`: supplies the broader research goal. Objective is 1–4096 characters, not blank, and incompatible with --similar. Preferences do not replace hard filters or source validation.
+- `exa-crawl URL --query "specific question" -c 2500 --compact`: extracts relevant passages from across a long page, with full text explicitly disabled. Do not assume excerpts contain all qualifications.
+- Search and crawl support `--max-age-hours`: omitted = API defaults; -1 = cache only; 0 = fresh fetch; 1–720 = maximum cache age. This controls content age, not publication date. Search type lite does not support the flag.
+- Search and crawl support `--compact`: implies JSON; one line; removes empty/decorative fields and duplicate URL IDs, while retaining evidence, substantive extended fields, costs, warnings and statuses. Ordinary --json remains unchanged.
+- Bounded full text reaching its cap warns on stderr that content may be incomplete. No automatic paid refetch or implicit state is added.

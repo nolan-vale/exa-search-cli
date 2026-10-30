@@ -51,6 +51,8 @@ Every command outputs clean `--json` for use in scripts, pipelines, and AI agent
 - Full page text extraction from any URL (no HTML)
 - AI deep research tasks with synthesized answers
 - Clean `--json` output for every command
+- Search objectives, query-focused page excerpts, and explicit content freshness
+- Optional `--compact` JSON keeps source evidence, costs and crawl statuses
 
 ## Installation
 
@@ -106,6 +108,8 @@ exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []
 | `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
 | `--text` | off | Fetch page text; terminal preview defaults to 2000 characters |
 | `--max-chars` | — | Text limit per result, used with `--text` |
+| `--objective` | — | Broader search goal and source preferences, up to 4096 characters |
+| `--max-age-hours` | — | Content freshness: `0` fresh fetch, `-1` cache only, `1–720` max age |
 | `--category` | — | `publication` · `people` · `company` · `news` · `personal site` · `financial report`; legacy flags remain accepted |
 | `--start-date` | — | Published on or after `YYYY-MM-DD` |
 | `--end-date` | — | Published on or before `YYYY-MM-DD` |
@@ -113,10 +117,12 @@ exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []
 | `--exclude-domain` | — | Comma-separated domains to exclude |
 | `--similar` | — | Find pages similar to this URL |
 | `--json` | off | Structured JSON output |
+| `--compact` | off | Compact source JSON; implies `--json` |
 | `--timeout` | `60` | HTTP connect/read timeout in seconds |
 | `--version` | — | Show package version without authentication |
 
-**All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--json`
+**All flags — `exa-crawl`:** `-c` / `--max-chars` (default `5000`),
+`--query`, `--max-age-hours`, `--json`, `--compact`, `--timeout`, `--version`
 
 **All flags — `exa-research`:** `-m` / `--model` (`exa-research-fast` · `exa-research` · `exa-research-pro`), `--json`
 
@@ -188,3 +194,32 @@ output now honors `-c` beyond 2000 characters. All commands support `--timeout`
 (default 60 seconds) and `--version`. Argument validation and credential-safe
 API diagnostics keep failures separate from JSON results. See the
 [usage guide](docs/USAGE.md#research-workflow-and-reliability-016).
+
+## Focused source reading
+
+```bash
+# Tell search what the broader task needs, without expanding the query itself.
+exa-search "home watch Tampa Bay pricing" \
+  --objective "Prefer local providers with published prices; exclude directories." \
+  -n 5 --compact
+
+# Extract relevant passages across a long page instead of only its opening text.
+exa-crawl https://www2.myfloridalicense.com/electrical-contractors/faqs/ \
+  --query "Is a license required to install low voltage network wiring?" \
+  -c 2500 --compact
+
+# Refresh a changing pricing page if cached content is older than a day.
+exa-crawl https://example.com/pricing --max-age-hours 24 --compact
+```
+
+`--query` requests highlights only and explicitly disables full text. Excerpts
+help locate evidence; they do not replace a full reading when context matters.
+When bounded full text reaches its limit, stderr warns that it may be incomplete.
+`--max-age-hours` is available on search and crawl; omit it to keep existing API
+defaults. Search mode `lite` does not accept freshness controls. `--objective`
+cannot be combined with `--similar`.
+
+`--compact` uses one-line JSON, removes empty values, duplicate URL IDs and
+decorative fields, and retains substantive data, costs, warnings and per-URL
+statuses. Existing `--json` output is unchanged. Neither mode saves state or
+automatically repeats a request. See [full details](docs/USAGE.md#focused-retrieval-and-compact-output).

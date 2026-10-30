@@ -27,6 +27,8 @@ exa-search <запрос> [--similar <url>] [параметры]
 | `-t` / `--type` | `auto` | `auto` · `lite` · `fast` · `instant` · `deep-lite` · `deep` · `deep-reasoning` · `keyword` · `neural` |
 | `--text` | off | Получить текст; preview в терминале по умолчанию 2000 символов |
 | `--max-chars` | — | Лимит текста на результат; требует `--text` |
+| `--objective` | — | Цель исследования и предпочтения источников; до 4096 символов |
+| `--max-age-hours` | — | Возраст контента: `0` — получить свежий, `-1` — только cache, `1–720` — максимальный возраст в часах |
 | `--timeout` | `60` | HTTP connect/read timeout в секундах |
 | `--version` | — | Показать версию без credentials |
 | `--category` | — | Фильтр по типу контента (см. ниже) |
@@ -36,6 +38,7 @@ exa-search <запрос> [--similar <url>] [параметры]
 | `--exclude-domain` | — | Исключить эти домены (через запятую) |
 | `--similar` | — | Найти похожие страницы по URL |
 | `--json` | off | Структурированный JSON-вывод |
+| `--compact` | off | Компактный JSON с источниками, стоимостью и статусами; включает JSON-режим |
 
 **Типы контента (--category):**
 `news` · `tweet` · `github` · `paper` · `company` · `research paper` · `financial report` · `personal site` · `pdf` · `linkedin profile`
@@ -60,7 +63,10 @@ exa-crawl <url> [параметры]
 | Флаг | По умолчанию | Описание |
 |---|---|---|
 | `-c` / `--max-chars` | `5000` | Максимум символов для возврата |
+| `--query` | — | Извлечь фрагменты по вопросу со всей страницы вместо её начала |
+| `--max-age-hours` | — | `0` — свежий fetch, `-1` — только cache, `1–720` — максимальный возраст |
 | `--json` | off | Структурированный JSON-вывод |
+| `--compact` | off | JSON в одну строку без пустых и декоративных полей |
 
 ```bash
 exa-crawl https://example.com
