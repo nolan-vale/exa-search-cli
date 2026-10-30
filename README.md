@@ -20,14 +20,16 @@ Built with AI coding agents as part of [Nolan Vale's](https://github.com/nolan-v
 
 ## What it does
 
-Four commands wrap Exa services:
+Five active commands wrap Exa services; two retired Research commands remain as migration helpers:
 
 | Command | Purpose |
 |---|---|
 | `exa-search` | Search the web or find pages similar to a reference URL |
 | `exa-crawl` | Retrieve readable page text or query-focused excerpts through Exa |
-| `exa-research` | Submit a research task to Exa |
-| `exa-research-status` | Check the task and retrieve its result |
+| `exa-agent` | Create an asynchronous, usage-billed Agent run |
+| `exa-agent-status` | Retrieve an Agent run, its output, sources, and cost |
+| `exa-agent-cancel` | Cancel a queued or running Agent run |
+| `exa-research`, `exa-research-status` | Retired API; exit with migration guidance without a network call |
 
 The commands support `--json` for scripts and AI-agent workflows. Search can be narrowed by date, domain, and content category. Retrieval depends on the provider and the accessibility of the source; it is not guaranteed to work for every URL.
 
@@ -68,8 +70,8 @@ exa-search "tutorial" --exclude-domain medium.com,dev.to
 exa-crawl https://example.com -c 8000
 
 # Submit and retrieve an external research task
-exa-research "document review workflow approaches"
-exa-research-status <research-id>
+exa-agent "document review workflow approaches" --max-cost 1
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID
 
 # Extract URLs from structured output
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
@@ -99,10 +101,39 @@ exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []
 Other options:
 
 - **`exa-crawl`:** `-c` / `--max-chars` (default `5000`), `--query`, `--max-age-hours`, `--json`, `--compact`, `--timeout`, `--version`.
-- **`exa-research`:** `-m` / `--model` (`exa-research-fast`, `exa-research`, `exa-research-pro`), `--json`. Model availability depends on Exa.
-- **`exa-research-status`:** `--json`.
+- **`exa-agent`:** `--effort`, `--max-cost`, `--system-prompt`, `--output-schema`, `--dry-run`, `--json`.
+- **`exa-agent-status`, `exa-agent-cancel`:** Agent run ID, `--json`, `--timeout`, `--version`.
+- **`exa-research`, `exa-research-status`:** deprecated migration helpers; they never create Agent runs.
 
 See [full usage documentation](docs/USAGE.md) and the installed commands' `--help` for additional details.
+
+## Research API migration
+
+Exa retired `/research`; a working search key does not restore that endpoint.
+Use `exa-agent` for new asynchronous Agent runs. Old Research model names and IDs
+are not automatically converted into a differently billed Agent request.
+See [Exa's changelog](https://exa.ai/docs/changelog) and
+[Agent guide](https://exa.ai/docs/agent/quickstart).
+
+```bash
+# Preview the exact create body without a key or network call.
+exa-agent "Compare local home watch providers" --max-cost 1 --dry-run
+
+# Explicitly submit a billed run, then save the returned ID.
+exa-agent "Compare local home watch providers" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
+```
+
+Agent creation returns immediately and does not poll or retry automatically.
+Completed output uses `output.text`, `output.structured`, and `output.grounding`;
+JSON also retains cost and stop-reason metadata. `--max-cost` accepts $1–$100 for
+`auto` and `ultra` effort. Without it, Exa currently defaults to $5 for `auto` and
+$20 for `ultra`. Other effort tiers use their provider pricing.
+
+Validation scope: search/crawl have live API checks. Agent create/get/cancel have
+SDK request/response contract tests, credential-free dry runs, and a live read-only
+Agent API access check. A paid Agent run was not submitted or completed in this
+validation; `--version` alone is not an API functionality test.
 
 ## AI-agent workflows
 
@@ -116,8 +147,8 @@ exa-search "topic" --json \
   | xargs exa-crawl -c 6000
 
 # Submit a research task, then retrieve the result
-exa-research "topic" --json
-exa-research-status <research-id> --json
+exa-agent "topic" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 ```
 
 Example search output:
@@ -169,7 +200,7 @@ automatically repeats a request. See [full details](docs/USAGE.md#focused-retrie
 
 ## Scope and review
 
-Queries and retrieval requests are sent to Exa. Research commands create tasks on that external service; this is not an entirely offline or read-only workflow. Keep API keys private, check source material, and review generated research before using it in a business decision.
+Queries and retrieval requests are sent to Exa. Agent creation creates tasks on that external service; this is not an entirely offline or read-only workflow. Keep API keys private, check source material, and review generated research before using it in a business decision.
 
 This project demonstrates a practical AI-assisted integration. It does not claim independently measured time savings, enterprise deployments, or an independent security audit. The provider's capabilities and availability remain outside this repository's control.
 

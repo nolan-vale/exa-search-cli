@@ -67,44 +67,18 @@ exa-crawl https://example.com --json
 
 ---
 
-### exa-research — AI 深度研究
+### Exa Agent / Research API migration
 
-```
-exa-research <主题> [选项]
-```
-
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | 关闭 | 结构化 JSON 输出 |
+旧 `/research` API 已关闭。请使用 `exa-agent` 创建任务、`exa-agent-status` 读取结果、`exa-agent-cancel` 取消任务。`--dry-run` 不需要密钥或网络。Agent 任务按用量计费；`--max-cost` 仅适用于 `auto` 和 `ultra`。本次验证涵盖请求契约和只读 API 访问，没有创建或完成付费 Agent 任务。
 
 ```bash
-exa-research "量子纠错的现状"
-exa-research "视觉语言模型 2025" --model exa-research-pro
+exa-agent "Compare local providers" --max-cost 1 --dry-run
+exa-agent "Compare local providers" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
+exa-agent-cancel agent_run_REPLACE_WITH_RETURNED_ID --json
 ```
 
-`exa-research` 只提交任务——打印 `research_id` 后立即返回。使用 `exa-research-status` 查询进度并获取结果。
-
----
-
-### exa-research-status — 查询任务状态 / 结果
-
-```
-exa-research-status <research-id> [选项]
-```
-
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `--json` | 关闭 | 结构化 JSON 输出 |
-
-```bash
-exa-research-status r_01k...
-exa-research-status r_01k... --json
-```
-
-状态为 `pending`、`running`、`completed`、`failed`、`canceled` 之一。`completed` 时打印合成的答案（`--json` 模式下为 `.output.content`）；`failed` 时打印错误信息（`.error`）。
-
----
+[Complete Agent command reference](USAGE.md#exa-agent).
 
 ## 脚本和管道示例
 

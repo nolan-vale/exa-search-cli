@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repo_id": "nolan-vale/exa-search-cli",
-  "purpose": "Provides command-line Exa search, URL crawling, and deep research with structured output for AI agents.",
+  "purpose": "Provides Exa search, content retrieval, and explicit Agent run lifecycle commands; legacy Research API commands are retired.",
   "objective": null,
   "sources": [{"role": "overview", "path": "README.md", "verify_live": true}],
   "exclude": ["dist/"]

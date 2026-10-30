@@ -1,5 +1,7 @@
 # exa-search-cli
 
+> Exa закрыла `/research`. В версии 0.1.7 используй `exa-agent`, `exa-agent-status` и `exa-agent-cancel`. Старые `exa-research*` завершаются с инструкцией перехода, без API-вызова и без автоматического создания платной задачи. `exa-agent --dry-run` показывает запрос без ключа и сети. [Миграция и параметры](docs/USAGE.ru.md).
+
 **Командная интеграция с Exa для повторяемых исследований: поиск источников, получение текста страниц и исследовательские задачи.**
 
 [English](README.md) · [中文](README.zh-CN.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
@@ -26,16 +28,17 @@ exa-search "document review workflow" --json
 |---|---|
 | `exa-search <query>` | Поиск и поиск похожих страниц; фильтры по дате, домену и категории |
 | `exa-crawl <url>` | Запрос читаемого текста страницы через Exa |
-| `exa-research <topic>` | Создание исследовательской задачи на стороне Exa |
-| `exa-research-status <research-id>` | Проверка статуса и получение результата задачи |
+| `exa-agent <query>` | Создать асинхронную задачу Exa Agent |
+| `exa-agent-status <run-id>` | Получить результат Agent run |
+| `exa-agent-cancel <run-id>` | Отменить Agent run |
 
 Команды поддерживают `--json`, `--timeout` и `--version`. Для поиска доступны `--num-results`, `--type`, `--text`, `--max-chars`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain`, `--similar`, `--objective`, `--max-age-hours` и `--compact`. Для `exa-crawl` добавлены `--query`, `--max-age-hours` и `--compact`; несколько URL можно передать одним запросом.
 
 ```bash
 exa-search --similar https://github.com/astral-sh/uv
 exa-crawl https://example.com -c 8000
-exa-research "document processing approaches" --json
-exa-research-status <research-id> --json
+exa-agent "document processing approaches" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 

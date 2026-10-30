@@ -1,5 +1,7 @@
 # exa-search-cli
 
+> Exa は `/research` を廃止しました。0.1.7 では `exa-agent`、`exa-agent-status`、`exa-agent-cancel` を使用します。旧 `exa-research*` は移行案内だけを表示し、API 呼び出しや有料タスクの自動作成は行いません。`--dry-run` はオフラインでリクエストを確認できます。[移行ガイド](docs/USAGE.md#exa-agent)。
+
 **繰り返し行う調査のための Exa CLI 連携。情報源の検索、ページ本文の取得、調査タスクを扱います。**
 
 [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [한국어](README.ko.md)
@@ -26,16 +28,17 @@ exa-search "document review workflow" --json
 |---|---|
 | `exa-search <query>` | 日付・ドメイン・カテゴリで絞り込み、情報源や類似ページを検索 |
 | `exa-crawl <url>` | Exa 経由で読みやすいページ本文を要求 |
-| `exa-research <topic>` | Exa 上に調査タスクを作成 |
-| `exa-research-status <research-id>` | 状態確認と結果取得 |
+| `exa-agent <query>` | 非同期 Exa Agent タスクを作成 |
+| `exa-agent-status <run-id>` | Agent の結果を取得 |
+| `exa-agent-cancel <run-id>` | Agent タスクをキャンセル |
 
 各コマンドは `--json` に対応します。検索では `--num-results`、`--type`、`--text`、`--category`、`--start-date`、`--end-date`、`--include-domain`、`--exclude-domain`、`--similar` を利用できます。
 
 ```bash
 exa-search --similar https://github.com/astral-sh/uv
 exa-crawl https://example.com -c 8000
-exa-research "document processing approaches" --json
-exa-research-status <research-id> --json
+exa-agent "document processing approaches" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 

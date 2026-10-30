@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "exa-search-cli"
-version = "0.1.6"
+version = "0.1.7"
 description = "AI-agent friendly CLI for Exa — neural web search, URL crawling, and deep research from the terminal."
 readme = "README.md"
 license = { text = "MIT" }
@@ -56,6 +56,9 @@ Changelog = "https://github.com/nolan-vale/exa-search-cli/releases"
 [project.scripts]
 exa-search          = "exa_cli.main:search"
 exa-crawl           = "exa_cli.main:crawl"
+exa-agent           = "exa_cli.agent:create"
+exa-agent-status    = "exa_cli.agent:status"
+exa-agent-cancel    = "exa_cli.agent:cancel"
 exa-research        = "exa_cli.main:research"
 exa-research-status = "exa_cli.main:research_status"
 

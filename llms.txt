@@ -20,8 +20,10 @@ Set EXA_API_KEY to an authorized Exa API key. Do not commit or expose the key.
 
 - `exa-search <query>`: search. Flags: --json, --compact, --num-results, --type, --category, --start-date, --end-date, --include-domain, --exclude-domain, --similar, --text, --max-chars, --objective, --max-age-hours.
 - `exa-crawl <url>`: request readable page text or focused excerpts. Flags: --json, --compact, --max-chars, --query, --max-age-hours.
-- `exa-research <topic>`: create a research task on Exa. Flags: --json, --model.
-- `exa-research-status <research-id>`: check a task and retrieve its result. Flags: --json.
+- `exa-agent QUERY`: create a usage-billed Agent run. Flags: --effort, --max-cost, --system-prompt, --output-schema, --dry-run, --json.
+- `exa-agent-status RUN_ID`: get one Agent run; --json preserves output, grounding, costDollars and stopReason.
+- `exa-agent-cancel RUN_ID`: cancel a queued/running Agent run; --json supported.
+- `exa-research` / `exa-research-status`: retired API migration helpers; fail locally with exit 1, never create a replacement run.
 
 Source access, categories, models, and result availability depend on the provider.
 
@@ -30,22 +32,22 @@ Source access, categories, models, and result availability depend on the provide
 ```bash
 exa-search "document review workflow" --json
 exa-crawl https://example.com -c 8000
-exa-research "document processing approaches" --json
-exa-research-status <research-id> --json
+exa-agent "document processing approaches" --max-cost 1 --dry-run
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 ```
 
 ## Output reference
 
 - Search: results[]{title, url, published_date, author, highlights[], text}.
 - Crawl: results[]{url, title, text}.
-- Research/status: {research_id, model, instructions, status, output.content, error}.
+- Agent: {id, status, output:{text, structured, grounding}, stopReason, costDollars, error}.
 - Result iterator for object or array responses: (if type=="array" then . else (.results // []) end)[].
 
 Consult README.md and docs/USAGE.md for examples and installed-command help for supported options.
 
 ## Data and review
 
-Requests are sent to Exa. Research commands create external tasks, so the integration is not entirely read-only or offline. Protect credentials and review generated research against source material before using it in decisions.
+Requests are sent to Exa. `exa-agent` creates an external task unless `--dry-run` is set; status reads a run and cancel updates it. The integration is not entirely read-only or offline. Protect credentials and review generated research against source material before using it in decisions.
 
 ## Key files
 
@@ -79,3 +81,13 @@ Requests are sent to Exa. Research commands create external tasks, so the integr
 - Search and crawl support `--max-age-hours`: omitted = API defaults; -1 = cache only; 0 = fresh fetch; 1–720 = maximum cache age. This controls content age, not publication date. Search type lite does not support the flag.
 - Search and crawl support `--compact`: implies JSON; one line; removes empty/decorative fields and duplicate URL IDs, while retaining evidence, substantive extended fields, costs, warnings and statuses. Ordinary --json remains unchanged.
 - Bounded full text reaching its cap warns on stderr that content may be incomplete. No automatic paid refetch or implicit state is added.
+
+## Agent migration (0.1.7)
+
+- `/research` is retired. Old model names and Research IDs are not automatically translated to Agent runs.
+- `exa-agent` calls the current Agent API once and returns immediately. No implicit polling, retries, continuation, or data-source add-ons.
+- `--dry-run` prints a POST /agent/runs request without authentication, secrets, or network access.
+- Efforts: minimal, low, medium, high, xhigh, auto (default), ultra. --max-cost accepts finite $1–$100 for auto/ultra. Omitted = provider default ($5 auto, $20 ultra at verification).
+- Schema files must contain a JSON object. The API validates JSON Schema semantics. Status and cancellation use Agent run IDs and never create a new run.
+- A completed run may stop at budget_reached and contain partial results. Preserve stopReason, citations and costs. Failed run status exits 1 with valid JSON.
+- Validation: live search/crawl; live read-only Agent API access; mocked SDK create/get/cancel contracts. Paid Agent execution and completion were not tested. --version checks only the local package.

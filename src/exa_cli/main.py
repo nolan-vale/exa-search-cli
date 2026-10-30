@@ -21,6 +21,10 @@ from exa_cli._output import compact_payload, warn_text_limit
 
 TEXT_PREVIEW_LEN = 2000
 RESULT_LIST_KEYS = ("results", "data", "items")
+RESEARCH_RETIRED = (
+    "The Exa Research API is retired. Use exa-agent to create a new Agent run "
+    "and exa-agent-status to retrieve it. Research IDs are not Agent run IDs."
+)
 
 CATEGORIES = [
     "publication",
@@ -401,13 +405,9 @@ def crawl() -> None:
 
 def research() -> None:
     p = argparse.ArgumentParser(
-        description="Exa deep research — AI-powered research task",
+        description="Retired Exa Research API — use exa-agent instead",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""examples:
-  exa-research "explain transformer attention mechanisms"
-  exa-research "quantum computing current state" --model exa-research-pro
-  exa-research "topic" --json
-""",
+        epilog=RESEARCH_RETIRED,
     )
     p.add_argument("topic")
     p.add_argument(
@@ -422,45 +422,17 @@ def research() -> None:
 
     if not args.topic.strip():
         p.error("topic must not be empty")
-    exa = _client(args.timeout)
-    result = api_call(exa.research.create, instructions=args.topic, model=args.model)
-
-    if args.json:
-        _dump_json(result)
-    else:
-        print("Research task created")
-        print(f"  ID:     {result.research_id}")
-        print(f"  Model:  {result.model}")
-        print(f"  Status: {result.status}")
-        print(f"\nCheck status: exa-research-status {result.research_id}")
+    sys.exit(RESEARCH_RETIRED)
 
 
 def research_status() -> None:
     p = argparse.ArgumentParser(
-        description="Exa deep research — check status and fetch the result of a research task",
+        description="Retired Exa Research API — use exa-agent-status for Agent runs",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""examples:
-  exa-research-status <research-id>
-  exa-research-status <research-id> --json
-""",
+        epilog=RESEARCH_RETIRED,
     )
     p.add_argument("research_id")
     p.add_argument("--json", action="store_true", help="structured JSON output")
     add_common_args(p)
-    args = p.parse_args()
-
-    exa = _client(args.timeout)
-    result = api_call(exa.research.get, args.research_id)
-
-    if args.json:
-        _dump_json(result)
-        return
-
-    print(f"Status: {result.status}")
-    if result.status == "completed":
-        print("\nResult:")
-        print(result.output.content)
-    elif result.status == "failed":
-        print(f"\nError: {result.error}")
-    else:
-        print("Still in progress — check again shortly.")
+    p.parse_args()
+    sys.exit(RESEARCH_RETIRED)

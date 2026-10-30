@@ -82,51 +82,63 @@ exa-crawl https://example.com --json
 
 ---
 
-### exa-research
+### exa-agent
 
+```bash
+exa-agent "Compare home watch providers in Tampa Bay" --max-cost 1 --dry-run
+exa-agent "Compare home watch providers in Tampa Bay" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
+exa-agent-cancel agent_run_REPLACE_WITH_RETURNED_ID --json
 ```
-exa-research <topic> [options]
-```
+
+`exa-agent` creates an asynchronous run through `POST /agent/runs` and returns
+immediately. No polling, retry, premium data source, or follow-up run is added
+implicitly. The returned `id` is the identifier for status and cancellation.
+Creating a run is usage-billed; dry runs do not authenticate or access the network.
 
 | Flag | Default | Description |
 |---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | off | Structured JSON output |
-| `--timeout` | `60` | HTTP connect/read timeout in seconds |
-| `--version` | — | Show package version without authentication |
+| `--effort` | `auto` | `minimal`, `low`, `medium`, `high`, `xhigh`, `auto`, `ultra` |
+| `--max-cost USD` | API default | Finite $1–$100 spend cap; only `auto` and `ultra` |
+| `--system-prompt` | — | Source preferences and output instructions |
+| `--output-schema FILE` | — | UTF-8 JSON Schema object for structured output |
+| `--dry-run` | off | Print method/path/body without creating a run or reading credentials |
+| `--json` | off | Native Agent API run object, including output, citations, cost and stop reason |
+| `--timeout` | `60` | Network connect/read timeout; not the Agent's execution duration |
+| `--version` | — | Local package version, not an API health check |
 
-**Examples:**
+Exa currently defaults to a $5 cap for `auto` and $20 for `ultra` if the cap is
+omitted; other effort tiers use provider pricing. `--output-schema` checks JSON
+syntax and object shape locally; the server validates the schema itself.
 
-```bash
-exa-research "explain transformer attention mechanisms"
-exa-research "quantum computing current state" --model exa-research-pro
-exa-research "topic" --json
-```
+### exa-agent-status and exa-agent-cancel
 
-`exa-research` only submits the task — it prints a `research_id` and returns immediately. Use `exa-research-status` to check progress and fetch the result.
+Both accept one Agent run ID and `--json`, `--timeout`, `--version`.
+Status makes one `GET /agent/runs/{id}` call. Cancellation makes one
+`POST /agent/runs/{id}/cancel` call. They do not start or continue a research task.
 
----
+Agent states are `queued`, `running`, `completed`, `failed`, and `cancelled`.
+Completed output is in `output.text`, `output.structured`, and `output.grounding`.
+Agent JSON preserves API field names such as `costDollars` and `stopReason`.
+`budget_reached` can accompany `completed` and partial results: inspect the stop
+reason before treating the result as exhaustive. A failed run exits 1 after
+printing its response; cancelled runs can be retrieved normally.
 
-### exa-research-status
+### Retired exa-research and exa-research-status
 
-```
-exa-research-status <research-id> [options]
-```
+Exa retired `/research`; all three old model names used that endpoint.
+These commands remain installed so existing scripts receive a clear migration
+error (exit 1), with no authentication, network call, or automatic paid Agent run.
+Old `research_id` values and `output.content` do not describe the new Agent API.
+`--help` and `--version` still work locally and do not establish service health.
 
-| Flag | Default | Description |
-|---|---|---|
-| `--json` | off | Structured JSON output |
-| `--timeout` | `60` | HTTP connect/read timeout in seconds |
-| `--version` | — | Show package version without authentication |
+See [Exa changelog](https://exa.ai/docs/changelog),
+[Agent guide](https://exa.ai/docs/agent/quickstart), and
+[Create a run](https://exa.ai/docs/reference/agent-api/create-a-run).
 
-**Examples:**
-
-```bash
-exa-research-status r_01k...
-exa-research-status r_01k... --json
-```
-
-Status is one of `pending`, `running`, `completed`, `failed`, `canceled`. When `completed`, the synthesized answer is printed (or available at `.output.content` in `--json` mode). When `failed`, the error message is printed (`.error` in JSON).
+Validation scope: create/get/cancel are covered by SDK wire-contract and response
+tests; Agent API access was checked using a live read-only request. No paid Agent
+run was submitted or completed as part of this release validation.
 
 ---
 
@@ -180,7 +192,7 @@ exa-search --version
 exa-crawl https://example.com --timeout 90
 ```
 
-All four commands support `--timeout SECONDS` (default 60, positive finite HTTP
+All commands support `--timeout SECONDS` (default 60, positive finite HTTP
 connect/read timeout) and `--version`. Exa calls are not automatically replayed.
 Search defaults to `auto` and highlights only; `--text` requests text instead of
 highlights. `lite` is the current low-latency mode. Older type and category flags

@@ -1,5 +1,7 @@
 # exa-search-cli
 
+> Exa의 `/research` API는 종료되었습니다. 0.1.7에서는 `exa-agent`, `exa-agent-status`, `exa-agent-cancel`을 사용합니다. 기존 `exa-research*`는 API 호출이나 유료 작업 생성 없이 이전 안내만 표시합니다. `--dry-run`으로 네트워크 없이 요청을 확인할 수 있습니다. [안내](docs/USAGE.md#exa-agent).
+
 **반복적인 조사를 위한 Exa CLI 연동: 출처 검색, 페이지 텍스트 조회, 조사 작업을 지원합니다.**
 
 [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [Español](README.es.md) · [日本語](README.ja.md)
@@ -26,16 +28,17 @@ exa-search "document review workflow" --json
 |---|---|
 | `exa-search <query>` | 날짜, 도메인, 카테고리 필터로 출처 또는 유사 페이지 검색 |
 | `exa-crawl <url>` | Exa를 통해 읽기 쉬운 페이지 텍스트 요청 |
-| `exa-research <topic>` | Exa에 조사 작업 생성 |
-| `exa-research-status <research-id>` | 상태 확인과 결과 조회 |
+| `exa-agent <query>` | 비동기 Exa Agent 작업 생성 |
+| `exa-agent-status <run-id>` | Agent 결과 조회 |
+| `exa-agent-cancel <run-id>` | Agent 작업 취소 |
 
 각 명령은 `--json`을 지원합니다. 검색 옵션은 `--num-results`, `--type`, `--text`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain`, `--similar`입니다.
 
 ```bash
 exa-search --similar https://github.com/astral-sh/uv
 exa-crawl https://example.com -c 8000
-exa-research "document processing approaches" --json
-exa-research-status <research-id> --json
+exa-agent "document processing approaches" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 

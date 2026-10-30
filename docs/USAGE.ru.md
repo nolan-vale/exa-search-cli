@@ -76,44 +76,18 @@ exa-crawl https://example.com --json
 
 ---
 
-### exa-research — глубокое AI-исследование
+### Exa Agent / Research API migration
 
-```
-exa-research <тема> [параметры]
-```
-
-| Флаг | По умолчанию | Описание |
-|---|---|---|
-| `-m` / `--model` | `exa-research` | `exa-research-fast` · `exa-research` · `exa-research-pro` |
-| `--json` | off | Структурированный JSON-вывод |
+Старый `/research` закрыт. Используй `exa-agent` для создания новой задачи, `exa-agent-status` для чтения результата и `exa-agent-cancel` для отмены. Старые команды завершаются с инструкцией миграции без API-вызова. `--dry-run` работает без ключа и сети. Создание Agent run оплачивается; `--max-cost` задаёт предел для `auto`/`ultra`. Проверка этой версии покрывает контракт запросов и чтение API; завершённый платный run не проверялся.
 
 ```bash
-exa-research "текущее состояние квантовой коррекции ошибок"
-exa-research "vision language models 2025" --model exa-research-pro
+exa-agent "Compare local providers" --max-cost 1 --dry-run
+exa-agent "Compare local providers" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
+exa-agent-cancel agent_run_REPLACE_WITH_RETURNED_ID --json
 ```
 
-`exa-research` только запускает задачу — печатает `research_id` и сразу завершается. Статус и результат проверяются через `exa-research-status`.
-
----
-
-### exa-research-status — статус / результат задачи
-
-```
-exa-research-status <research-id> [параметры]
-```
-
-| Флаг | По умолчанию | Описание |
-|---|---|---|
-| `--json` | off | Структурированный JSON-вывод |
-
-```bash
-exa-research-status r_01k...
-exa-research-status r_01k... --json
-```
-
-Статус — один из `pending`, `running`, `completed`, `failed`, `canceled`. При `completed` печатается синтезированный ответ (`.output.content` в `--json`). При `failed` — сообщение об ошибке (`.error`).
-
----
+[Complete Agent command reference](USAGE.md#exa-agent).
 
 ## Скрипты и пайплайны
 

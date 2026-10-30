@@ -142,69 +142,27 @@ class JsonPayloadTests(unittest.TestCase):
         payload = json.loads(stdout.getvalue())
         self.assertEqual(payload["results"][0]["url"], "https://example.com")
 
-    def test_research_json_entrypoint_outputs_task_metadata(self):
-        client = mock.Mock()
-        client.research.create.return_value = Obj(
-            research_id="r_1",
-            model="exa-research",
-            instructions="topic",
-            status="pending",
-        )
-
-        with mock.patch.dict(os.environ, {"EXA_API_KEY": "test"}, clear=True):
-            with mock.patch("exa_cli.main.Exa", return_value=client):
-                with mock.patch.object(
-                    sys, "argv", ["exa-research", "topic", "--json"]
-                ):
-                    stdout = io.StringIO()
-                    with contextlib.redirect_stdout(stdout):
-                        research()
-
-        payload = json.loads(stdout.getvalue())
-        self.assertEqual(payload["research_id"], "r_1")
-        client.research.create.assert_called_once_with(
-            instructions="topic",
-            model="exa-research",
-        )
-
-    def test_research_status_json_entrypoint_outputs_completed_result(self):
-        client = mock.Mock()
-        client.research.get.return_value = Obj(
-            research_id="r_1",
-            status="completed",
-            output=Obj(content="answer"),
-        )
-
-        with mock.patch.dict(os.environ, {"EXA_API_KEY": "test"}, clear=True):
-            with mock.patch("exa_cli.main.Exa", return_value=client):
-                with mock.patch.object(
-                    sys, "argv", ["exa-research-status", "r_1", "--json"]
-                ):
-                    stdout = io.StringIO()
-                    with contextlib.redirect_stdout(stdout):
-                        research_status()
-
-        payload = json.loads(stdout.getvalue())
-        self.assertEqual(payload["output"]["content"], "answer")
-        client.research.get.assert_called_once_with("r_1")
-
-    def test_research_status_text_entrypoint_prints_completed_content(self):
-        client = mock.Mock()
-        client.research.get.return_value = Obj(
-            research_id="r_1",
-            status="completed",
-            output=Obj(content="answer"),
-        )
-
-        with mock.patch.dict(os.environ, {"EXA_API_KEY": "test"}, clear=True):
-            with mock.patch("exa_cli.main.Exa", return_value=client):
-                with mock.patch.object(sys, "argv", ["exa-research-status", "r_1"]):
-                    stdout = io.StringIO()
-                    with contextlib.redirect_stdout(stdout):
-                        research_status()
-
-        self.assertIn("Status: completed", stdout.getvalue())
-        self.assertIn("answer", stdout.getvalue())
+    def test_retired_research_commands_never_authenticate_or_start_an_agent(self):
+        cases = [
+            (research, ["exa-research", "topic", "--json"]),
+            (research, ["exa-research", "topic", "--model", "exa-research-pro"]),
+            (research_status, ["exa-research-status", "old-research-id", "--json"]),
+        ]
+        for entrypoint, argv in cases:
+            output, errors = io.StringIO(), io.StringIO()
+            with (
+                self.subTest(argv=argv),
+                mock.patch("exa_cli.main._client") as client,
+                mock.patch.object(sys, "argv", argv),
+                contextlib.redirect_stdout(output),
+                contextlib.redirect_stderr(errors),
+                self.assertRaises(SystemExit) as error,
+            ):
+                entrypoint()
+            self.assertIn("retired", str(error.exception))
+            self.assertIn("exa-agent", str(error.exception))
+            self.assertEqual(output.getvalue(), "")
+            client.assert_not_called()
 
 
 if __name__ == "__main__":

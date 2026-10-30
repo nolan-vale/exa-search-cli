@@ -1,5 +1,7 @@
 # exa-search-cli
 
+> Exa retiró `/research`. En 0.1.7 usa `exa-agent`, `exa-agent-status` y `exa-agent-cancel`; `exa-research*` solo muestra instrucciones de migración, sin solicitudes ni tareas de pago automáticas. `--dry-run` permite revisar la solicitud sin conexión. [Guía](docs/USAGE.md#exa-agent).
+
 **Integración de línea de comandos con Exa para investigación repetible: búsqueda, recuperación de texto y tareas de investigación.**
 
 [English](README.md) · [中文](README.zh-CN.md) · [Русский](README.ru.md) · [Português](README.pt-BR.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
@@ -26,16 +28,17 @@ También puede instalarse con `pip install exa-search-cli` en un entorno Python 
 |---|---|
 | `exa-search <query>` | Buscar fuentes o páginas similares con filtros de fecha, dominio y categoría |
 | `exa-crawl <url>` | Solicitar texto legible de una página a través de Exa |
-| `exa-research <topic>` | Crear una tarea de investigación en Exa |
-| `exa-research-status <research-id>` | Consultar el estado y recuperar el resultado |
+| `exa-agent <query>` | Crear una tarea asíncrona de Exa Agent |
+| `exa-agent-status <run-id>` | Consultar el resultado de Agent |
+| `exa-agent-cancel <run-id>` | Cancelar una tarea de Agent |
 
 Los comandos admiten `--json`. La búsqueda admite `--num-results`, `--type`, `--text`, `--category`, `--start-date`, `--end-date`, `--include-domain`, `--exclude-domain` y `--similar`.
 
 ```bash
 exa-search --similar https://github.com/astral-sh/uv
 exa-crawl https://example.com -c 8000
-exa-research "document processing approaches" --json
-exa-research-status <research-id> --json
+exa-agent "document processing approaches" --max-cost 1 --json
+exa-agent-status agent_run_REPLACE_WITH_RETURNED_ID --json
 exa-search "topic" --json | jq -r '(if type=="array" then . else (.results // []) end)[] | .url'
 ```
 

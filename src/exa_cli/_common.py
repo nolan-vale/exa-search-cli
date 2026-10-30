@@ -81,9 +81,9 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def api_call(method, *args, **kwargs):
+def api_call(operation, /, *args, **kwargs):
     try:
-        return method(*args, **kwargs)
+        return operation(*args, **kwargs)
     except ExaTimeoutError:
         sys.exit("Exa request timed out; retry or increase --timeout")
     except requests.RequestException as exc:
